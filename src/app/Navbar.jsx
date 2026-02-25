@@ -306,6 +306,7 @@ import {
   Menu,
   X,
   ChevronDown,
+  ChevronLeft,
 } from "lucide-react";
 import { Poppins, Inter } from "next/font/google";
 
@@ -461,9 +462,9 @@ export default function Navbar() {
           </button>
         </div>
 
-        <nav className="hidden md:flex justify-center gap-8 py-3 border-t border-[var(--color-border)]">
+        <nav className="hidden md:flex justify-center  gap-8 py-5 border-t border-[var(--color-border)]">
           {NAV_ITEMS.map((item) => (
-            <NavItem key={item.label} item={item} />
+            <NavItem className key={item.label} item={item} />
           ))}
         </nav>
       </header>
@@ -506,13 +507,13 @@ export default function Navbar() {
           <p className="text-xs opacity-70 mt-1">Acrylic & Metal Wall Art</p>
         </div>
 
-        <div className="px-3 py-4 space-y-2 overflow-y-auto">
+        <div className="px-3 py-4 space-y-2 overflow-y-auto ">
           {NAV_ITEMS.map((item) => (
             <div key={item.label}>
               {item.children ? (
                 <>
                   <button
-                    className="w-full flex items-center justify-between px-4 py-3 rounded-xl text-sm font-medium transition"
+                    className="w-full flex items-center justify-between px-4 py-3 rounded-xl font-medium transition"
                     style={{
                       background:
                         expanded === item.label
@@ -528,7 +529,7 @@ export default function Navbar() {
                       setExpanded(expanded === item.label ? null : item.label)
                     }
                   >
-                    <span className="flex items-center gap-3">
+                    <span className="flex items-center gap-3 text-lg">
                       <span
                         style={{
                           width: "4px",
@@ -555,14 +556,14 @@ export default function Navbar() {
 
                   {expanded === item.label && (
                     <div
-                      className="ml-5 mt-2 space-y-2 p-3 rounded-lg"
+                      className="ml-5 mt-2 space-y-2 py-3 px-2   rounded-lg"
                       style={{ background: "var(--color-blue-soft)" }}
                     >
                       {item.children.map((child) => (
                         <a
                           key={child.label}
                           href={child.href}
-                          className="block px-3 py-2 rounded-md text-sm transition"
+                          className="block px-3 py-2  rounded-md transition"
                           style={{
                             color: "var(--color-text-secondary)",
                           }}
@@ -584,12 +585,13 @@ export default function Navbar() {
                   )}
                 </>
               ) : (
+                
                 <a
                   href={item.href}
-                  className="block px-4 py-3 rounded-xl text-sm font-medium transition"
+                  className="block px-4 py-3 rounded-xl text-lg font-medium transition shadow-sm "
                   style={{
                     background: "white",
-                    border: "1px solid var(--color-border)",
+                    
                   }}
                   onMouseEnter={(e) => {
                     e.currentTarget.style.background = "var(--color-blue-soft)";

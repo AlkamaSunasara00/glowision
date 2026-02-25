@@ -114,7 +114,7 @@ function FooterCol({ title, children }) {
 
 function FooterLink({ text }) {
   return (
-    <p className="relative text-lg opacity-70 hover:opacity-100 cursor-pointer transition group w-fit">
+    <p className="relative text-md opacity-70 hover:opacity-100 cursor-pointer transition group w-fit">
       {text}
 
       {/* animated underline */}
@@ -129,7 +129,7 @@ function MobileSection({ title, open, toggle, children }) {
 
       <button
         onClick={toggle}
-        className="flex justify-between w-full text-left  font-semibold text-2xl tracking-wide text-[var(--color-gold)]"
+        className="flex justify-between w-full text-left  font-semibold text-lg tracking-wide text-[var(--color-gold)]"
       >
         {title}
         <span className="text-xl ">{open ? "−" : "+"}</span>
