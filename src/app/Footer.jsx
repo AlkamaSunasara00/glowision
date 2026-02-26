@@ -10,7 +10,7 @@ export default function Footer() {
 
   return (
     <footer
-      className="mt-20 text-white"
+      className="mt-20 text-white pb-20"
       style={{
         background:
           "linear-gradient(180deg, #2d3756 0%, #242E4A 100%)",

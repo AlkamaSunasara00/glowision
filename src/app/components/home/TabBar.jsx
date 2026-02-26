@@ -73,6 +73,8 @@ export default function BottomTabBar() {
     setSuggestions(DEFAULT_SUGGESTIONS);
   };
 
+  
+
   return (
     <>
       <style>{`@import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600&display=swap');`}</style>
@@ -83,7 +85,7 @@ export default function BottomTabBar() {
           className="fixed inset-0 z-[60] md:hidden flex flex-col items-center pt-20 px-4"
           style={{
             background: "rgba(10, 14, 40, 0.55)",
-            backdropFilter: "blur(1px)",
+            backdropFilter: "blur(2px)",
             WebkitBackdropFilter: "blur(20px)",
           }}
           onClick={(e) => { if (e.target === e.currentTarget) closeSearch(); }}

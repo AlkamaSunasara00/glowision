@@ -115,12 +115,12 @@ function ProductCard({ product }) {
         overflow: "hidden",
         border: "1px solid var(--color-border)",
         boxShadow: hovered ? "var(--shadow-hover)" : "var(--shadow-soft)",
-        transform: hovered ? "translateY(-6px)" : "translateY(0)",
         transition: "all 0.35s cubic-bezier(0.34, 1.2, 0.64, 1)",
         cursor: "pointer",
         position: "relative",
         display: "flex",
         flexDirection: "column",
+        gap:"0px",
       }}
     >
       {/* ================= IMAGE ================= */}
@@ -233,7 +233,7 @@ function ProductCard({ product }) {
       {/* ================= CARD BODY ================= */}
       <div
         style={{
-          padding: "16px 16px 18px",
+          padding: "12px 12px 13px",
           display: "flex",
           flexDirection: "column",
           flexGrow: 1,
@@ -321,10 +321,6 @@ function ProductCard({ product }) {
         <div
           style={{
             marginTop: "auto",
-            opacity: isMobile ? 1 : hovered ? 1 : 0,
-            transform:
-              hovered || isMobile ? "translateY(0)" : "translateY(10px)",
-            transition: "all 0.3s ease",
           }}
         >
           <button
@@ -358,6 +354,18 @@ function ProductCard({ product }) {
 
 export default function ProductsSection() {
   const [visibleCount, setVisibleCount] = useState(4);
+    const [isMobile, setIsMobile] = useState(false);
+
+  useEffect(() => {
+    const checkScreen = () => {
+      setIsMobile(window.innerWidth < 1024);
+    };
+
+    checkScreen(); // run once
+    window.addEventListener("resize", checkScreen);
+
+    return () => window.removeEventListener("resize", checkScreen);
+  }, []);
 
   const visibleProducts = PRODUCTS.slice(0, visibleCount);
 
@@ -378,7 +386,7 @@ export default function ProductsSection() {
         style={{ background: "var(--color-bg-main)", padding: "72px 0 80px" }}
       >
         <div
-          style={{ maxWidth: "1280px", margin: "0 auto", padding: "0 24px" }}
+          style={{ maxWidth: "1280px", margin: "0 auto", padding: isMobile ? "0 10px" : "0 24px" }}
         >
           {/* Section Header */}
           <div
