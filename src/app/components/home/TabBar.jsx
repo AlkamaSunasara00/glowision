@@ -57,6 +57,7 @@ export default function BottomTabBar() {
       setTimeout(() => inputRef.current.focus(), 100);
     }
   }, [searchOpen]);
+  
 
   const handleTabClick = (tab) => {
     if (tab.id === "search") {
@@ -72,6 +73,17 @@ export default function BottomTabBar() {
     setQuery("");
     setSuggestions(DEFAULT_SUGGESTIONS);
   };
+
+  useEffect(() => {
+  if (searchOpen) {
+    document.body.style.overflow = "hidden";
+  } else {
+    document.body.style.overflow = "";
+  }
+  return () => {
+    document.body.style.overflow = "";
+  };
+}, [searchOpen]);
 
   
 

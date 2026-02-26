@@ -95,7 +95,7 @@ export default function HeroSlider() {
   }, [transition]);
 
   return (
-    <section className="relative w-full aspect-[10/9] md:aspect-[16/6] overflow-hidden group">
+    <section className="relative w-full aspect-[10/6] md:aspect-[16/6] overflow-hidden group">
       {/* SLIDER TRACK */}
       <div
         ref={sliderRef}
