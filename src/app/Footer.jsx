@@ -136,7 +136,7 @@ function MobileSection({ title, open, toggle, children }) {
       </button>
 
       <div
-        className={`overflow-hidden transition-all duration-300l ${
+        className={`overflow-hidden transition-all duration-300 ${
           open ? "max-h-60 opacity-100 mt-3" : "max-h-0 opacity-0"
         }`}
       >

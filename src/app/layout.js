@@ -2,6 +2,7 @@ import "./globals.css";
 import Navbar from "./Navbar";
 import Footer from "./Footer";
 import { Poppins, Inter } from "next/font/google";
+import BottomTabBar from "./components/home/TabBar";
 
 const poppins = Poppins({
   subsets: ["latin"],
@@ -22,13 +23,10 @@ export default function RootLayout({ children }) {
   return (
     <html lang="en">
       <body className={`${poppins.variable} ${inter.variable} antialiased`}>
-        <div className="max-h-dvh">
           <Navbar />
-        </div>
-        <div className="max-h-dvh">{children}</div>
-        <div className="max-h-dvh">
+          {children}
           <Footer />
-        </div>
+        <BottomTabBar />
       </body>
     </html>
   );
