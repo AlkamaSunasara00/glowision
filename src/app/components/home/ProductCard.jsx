@@ -1,16 +1,22 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Heart, ShoppingBag, Star, ArrowRight, Eye } from "lucide-react";
 import { PRODUCTS } from "@/app/data/productsData";
 import { ArrowDown } from "lucide-react";
-
 
 function HeartParticles({ active }) {
   const particles = Array.from({ length: 10 });
   if (!active) return null;
   return (
-    <div style={{ position: "absolute", inset: 0, pointerEvents: "none", zIndex: 10 }}>
+    <div
+      style={{
+        position: "absolute",
+        inset: 0,
+        pointerEvents: "none",
+        zIndex: 10,
+      }}
+    >
       {particles.map((_, i) => {
         const angle = (i / particles.length) * 360;
         const distance = 28 + Math.random() * 16;
@@ -52,22 +58,36 @@ function StarRating({ rating }) {
   return (
     <div style={{ display: "flex", alignItems: "center", gap: "2px" }}>
       {[1, 2, 3, 4, 5].map((s) => (
-        <Star key={s} size={11} style={{
-          fill: s <= Math.round(rating) ? "#475792" : "transparent",
-          color: s <= Math.round(rating) ? "#475792" : "#D1D5DB",
-        }} />
+        <Star
+          key={s}
+          size={11}
+          style={{
+            fill: s <= Math.round(rating) ? "#475792" : "transparent",
+            color: s <= Math.round(rating) ? "#475792" : "#D1D5DB",
+          }}
+        />
       ))}
     </div>
   );
 }
-
-
 
 function ProductCard({ product }) {
   const [hovered, setHovered] = useState(false);
   const [wishlisted, setWishlisted] = useState(false);
   const [addedToCart, setAddedToCart] = useState(false);
   const [particles, setParticles] = useState(false);
+  const [isMobile, setIsMobile] = useState(false);
+
+  useEffect(() => {
+    const checkScreen = () => {
+      setIsMobile(window.innerWidth < 1024);
+    };
+
+    checkScreen(); // run once
+    window.addEventListener("resize", checkScreen);
+
+    return () => window.removeEventListener("resize", checkScreen);
+  }, []);
 
   const handleWishlist = (e) => {
     e.preventDefault();
@@ -152,17 +172,9 @@ function ProductCard({ product }) {
             flexDirection: "column",
             gap: "8px",
             zIndex: 5,
-            opacity:
-              typeof window !== "undefined" &&
-              window.innerWidth < 1024
-                ? 1
-                : hovered
-                ? 1
-                : 0,
+            opacity: isMobile ? 1 : hovered ? 1 : 0,
             transform:
-              hovered || window.innerWidth < 1024
-                ? "translateX(0)"
-                : "translateX(20px)",
+              hovered || isMobile ? "translateX(0)" : "translateX(20px)",
             transition: "all 0.3s cubic-bezier(0.34,1.3,0.64,1)",
           }}
         >
@@ -174,9 +186,7 @@ function ProductCard({ product }) {
                 width: "36px",
                 height: "36px",
                 borderRadius: "50%",
-                background: wishlisted
-                  ? "#fff1f1"
-                  : "rgba(255,255,255,0.95)",
+                background: wishlisted ? "#fff1f1" : "rgba(255,255,255,0.95)",
                 border: wishlisted
                   ? "1.5px solid #fca5a5"
                   : "1.5px solid rgba(255,255,255,0.6)",
@@ -311,17 +321,9 @@ function ProductCard({ product }) {
         <div
           style={{
             marginTop: "auto",
-            opacity:
-              typeof window !== "undefined" &&
-              window.innerWidth < 1024
-                ? 1
-                : hovered
-                ? 1
-                : 0,
+            opacity: isMobile ? 1 : hovered ? 1 : 0,
             transform:
-              hovered || window.innerWidth < 1024
-                ? "translateY(0)"
-                : "translateY(10px)",
+              hovered || isMobile ? "translateY(0)" : "translateY(10px)",
             transition: "all 0.3s ease",
           }}
         >
@@ -331,12 +333,8 @@ function ProductCard({ product }) {
               width: "100%",
               padding: "10px",
               borderRadius: "12px",
-              background: addedToCart
-                ? "#22c55e"
-                : "var(--color-gold)",
-              color: addedToCart
-                ? "#fff"
-                : "var(--color-blue-dark)",
+              background: addedToCart ? "#22c55e" : "var(--color-gold)",
+              color: addedToCart ? "#fff" : "var(--color-blue-dark)",
               border: "none",
               fontFamily: "'DM Sans', sans-serif",
               fontWeight: 700,
@@ -376,63 +374,116 @@ export default function ProductsSection() {
         @media (min-width: 1024px) { .product-grid { grid-template-columns: repeat(4, 1fr); gap: 24px; } }
       `}</style>
 
-      <section style={{ background: "var(--color-bg-main)", padding: "72px 0 80px" }}>
-        <div style={{ maxWidth: "1280px", margin: "0 auto", padding: "0 24px" }}>
-
+      <section
+        style={{ background: "var(--color-bg-main)", padding: "72px 0 80px" }}
+      >
+        <div
+          style={{ maxWidth: "1280px", margin: "0 auto", padding: "0 24px" }}
+        >
           {/* Section Header */}
-          <div style={{ display: "flex", flexDirection: "column", alignItems: "center", marginBottom: "48px" }}>
-            <div style={{
-              display: "inline-flex",
+          <div
+            style={{
+              display: "flex",
+              flexDirection: "column",
               alignItems: "center",
-              gap: "8px",
-              background: "var(--color-gold-soft)",
-              border: "1px solid #F2B461",
-              borderRadius: "999px",
-              padding: "6px 16px",
-              marginBottom: "16px",
-            }}>
-              <span style={{ width: "6px", height: "6px", borderRadius: "50%", background: "var(--color-gold)" }} />
-              <span style={{
-                fontFamily: "'DM Sans', sans-serif",
-                fontSize: "12px",
-                fontWeight: 700,
-                color: "#E6A24A",
-                letterSpacing: "1px",
-                textTransform: "uppercase"
-              }}>
+              marginBottom: "48px",
+            }}
+          >
+            <div
+              style={{
+                display: "inline-flex",
+                alignItems: "center",
+                gap: "8px",
+                background: "var(--color-gold-soft)",
+                border: "1px solid #F2B461",
+                borderRadius: "999px",
+                padding: "6px 16px",
+                marginBottom: "16px",
+              }}
+            >
+              <span
+                style={{
+                  width: "6px",
+                  height: "6px",
+                  borderRadius: "50%",
+                  background: "var(--color-gold)",
+                }}
+              />
+              <span
+                style={{
+                  fontFamily: "'DM Sans', sans-serif",
+                  fontSize: "12px",
+                  fontWeight: 700,
+                  color: "#E6A24A",
+                  letterSpacing: "1px",
+                  textTransform: "uppercase",
+                }}
+              >
                 Handcrafted with Love
               </span>
             </div>
 
-            <h2 style={{
-              fontFamily: "'Playfair Display', serif",
-              fontSize: "clamp(28px, 4vw, 44px)",
-              fontWeight: 700,
-              color: "var(--color-blue-dark)",
-              textAlign: "center",
-              lineHeight: 1.2,
-              marginBottom: "14px",
-            }}>
-              Our Featured <span style={{ color: "var(--color-gold)" }}>Collection</span>
+            <h2
+              style={{
+                fontFamily: "'Playfair Display', serif",
+                fontSize: "clamp(28px, 4vw, 44px)",
+                fontWeight: 700,
+                color: "var(--color-blue-dark)",
+                textAlign: "center",
+                lineHeight: 1.2,
+                marginBottom: "14px",
+              }}
+            >
+              Our Featured{" "}
+              <span style={{ color: "var(--color-gold)" }}>Collection</span>
             </h2>
 
-            <p style={{
-              fontFamily: "'DM Sans', sans-serif",
-              fontSize: "15px",
-              color: "var(--color-text-secondary)",
-              textAlign: "center",
-              maxWidth: "480px",
-              lineHeight: 1.7,
-            }}>
-              Beautifully crafted Islamic home decor that brings elegance and spiritual meaning to every corner of your home.
+            <p
+              style={{
+                fontFamily: "'DM Sans', sans-serif",
+                fontSize: "15px",
+                color: "var(--color-text-secondary)",
+                textAlign: "center",
+                maxWidth: "480px",
+                lineHeight: 1.7,
+              }}
+            >
+              Beautifully crafted Islamic home decor that brings elegance and
+              spiritual meaning to every corner of your home.
             </p>
           </div>
 
           {/* Divider */}
-          <div style={{ display: "flex", alignItems: "center", gap: "16px", marginBottom: "40px" }}>
-            <div style={{ flex: 1, height: "1px", background: "var(--color-border)" }} />
-            <div style={{ width: "8px", height: "8px", borderRadius: "50%", background: "var(--color-gold)" }} />
-            <div style={{ flex: 1, height: "1px", background: "var(--color-border)" }} />
+          <div
+            style={{
+              display: "flex",
+              alignItems: "center",
+              gap: "16px",
+              marginBottom: "40px",
+            }}
+          >
+            <div
+              style={{
+                flex: 1,
+                height: "1px",
+                background: "var(--color-border)",
+              }}
+            />
+            <div
+              style={{
+                width: "8px",
+                height: "8px",
+                borderRadius: "50%",
+                background: "var(--color-gold)",
+              }}
+            />
+            <div
+              style={{
+                flex: 1,
+                height: "1px",
+                background: "var(--color-border)",
+              }}
+            />
           </div>
 
           {/* Product Grid */}
@@ -444,7 +495,13 @@ export default function ProductsSection() {
 
           {/* Load More Button */}
           {visibleCount < PRODUCTS.length && (
-            <div style={{ display: "flex", justifyContent: "center", marginTop: "52px" }}>
+            <div
+              style={{
+                display: "flex",
+                justifyContent: "center",
+                marginTop: "52px",
+              }}
+            >
               <button
                 onClick={handleLoadMore}
                 style={{
@@ -461,15 +518,17 @@ export default function ProductsSection() {
                   border: "none",
                   cursor: "pointer",
                   transition: "all 0.3s ease",
-                  boxShadow: "0 6px 20px rgba(0,0,0,0.08)"
+                  boxShadow: "0 6px 20px rgba(0,0,0,0.08)",
                 }}
                 onMouseEnter={(e) => {
                   e.currentTarget.style.transform = "translateY(-2px)";
-                  e.currentTarget.style.boxShadow = "0 10px 30px rgba(0,0,0,0.12)";
+                  e.currentTarget.style.boxShadow =
+                    "0 10px 30px rgba(0,0,0,0.12)";
                 }}
                 onMouseLeave={(e) => {
                   e.currentTarget.style.transform = "translateY(0)";
-                  e.currentTarget.style.boxShadow = "0 6px 20px rgba(0,0,0,0.08)";
+                  e.currentTarget.style.boxShadow =
+                    "0 6px 20px rgba(0,0,0,0.08)";
                 }}
               >
                 Load More
