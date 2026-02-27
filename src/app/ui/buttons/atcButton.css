@@ -1,0 +1,273 @@
+/* =============================================
+   AddToCartButton — atcButton.css
+   ============================================= */
+
+/* ── Base ── */
+.atc-btn {
+  position: relative;
+  overflow: hidden;
+  width: 100%;
+  height: 40px;
+  padding: 0 16px;
+  border-radius: 12px;
+  border: none;
+  cursor: pointer;
+  font-family: "DM Sans", sans-serif;
+  font-weight: 700;
+  font-size: 13px;
+  background: var(--color-gold);
+  color: var(--color-blue-dark);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  transition: background 0.4s ease, box-shadow 0.2s ease, transform 0.2s ease;
+  -webkit-tap-highlight-color: transparent;
+  user-select: none;
+}
+.atc-btn:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 6px 18px rgba(242, 180, 97, 0.45);
+}
+.atc-btn:active {
+  transform: scale(0.97);
+}
+.atc-btn.atc-loading:hover,
+.atc-btn.atc-added:hover {
+  transform: none;
+  box-shadow: none;
+}
+
+/* ── ADDED background ── */
+.atc-btn.atc-added {
+  background: #22c55e;
+  color: #fff;
+  box-shadow: 0 4px 14px rgba(34, 197, 94, 0.35);
+}
+
+/* ── Progress track ── */
+.atc-track {
+  position: absolute;
+  left: 0;
+  top: 0;
+  height: 100%;
+  width: 0%;
+  background: rgba(36, 46, 74, 0.1);
+  border-radius: inherit;
+  z-index: 0;
+}
+.atc-btn.atc-loading .atc-track {
+  animation: atc-track-fill 1.8s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+}
+.atc-btn.atc-added .atc-track {
+  width: 0%;
+}
+@keyframes atc-track-fill {
+  0%   { width: 0%; }
+  100% { width: 100%; }
+}
+
+/* ── Sliding cart ── 
+   KEY FIX: use transform: translateX() instead of `left`
+   GPU-accelerated → buttery smooth, zero jerk
+── */
+.atc-cart-slider {
+  position: absolute;
+  top: 50%;
+  left: 0;                            /* anchor at left edge */
+  transform: translateY(-50%) translateX(-40px); /* start off-screen left */
+  z-index: 2;
+  color: var(--color-blue-dark);
+  opacity: 0;
+  pointer-events: none;
+  display: flex;
+  align-items: center;
+  will-change: transform;             /* hint browser to use GPU */
+}
+
+.atc-btn.atc-loading .atc-cart-slider {
+  animation: atc-cart-ride 1s cubic-bezier(0.23, 0, 0.46, 1) forwards;
+}
+.atc-btn.atc-added .atc-cart-slider {
+  opacity: 0;
+}
+
+/* 
+  translateX values go from -40px (off-screen left) 
+  to calc(100vw) equivalent using button-relative units.
+  Using a fixed px journey: button is ~full width, 
+  so 0px = left edge, 300px covers any button width.
+*/
+@keyframes atc-cart-ride {
+  0%   {
+    transform: translateY(-50%) translateX(-40px);
+    opacity: 0;
+  }
+  5%   {
+    transform: translateY(-50%) translateX(0px);
+    opacity: 1;
+  }
+  15%  {
+    transform: translateY(-52%) translateX(20px) rotate(3deg);
+  }
+  25%  {
+    transform: translateY(-48%) translateX(40px) rotate(-3deg);
+  }
+  40%  {
+    transform: translateY(-50%) translateX(80px) rotate(0deg);
+  }
+  75%  {
+    transform: translateY(-50%) translateX(180px) rotate(0deg);
+    opacity: 1;
+  }
+  90%  {
+    transform: translateY(-50%) translateX(230px) rotate(-5deg);
+    opacity: 0.5;
+  }
+  100% {
+    transform: translateY(-50%) translateX(280px) rotate(-10deg);
+    opacity: 0;
+  }
+}
+
+/* Cart icon fill mid-animation */
+.atc-cart-icon {
+  transition: fill 0.3s ease;
+}
+.atc-btn.atc-loading .atc-cart-icon {
+  animation: atc-cart-fill 1.8s linear forwards;
+}
+@keyframes atc-cart-fill {
+  0%,  45% { color: var(--color-blue-dark); }
+  65%, 100% { color: var(--color-blue-dark); filter: drop-shadow(0 0 4px rgba(36,46,74,0.4)); }
+}
+
+/* ── Speed trace lines (positioned relative to cart-slider) ── */
+.atc-trace {
+  display: block;
+  position: absolute;
+  height: 2px;
+  background: var(--color-blue-dark);
+  border-radius: 2px;
+  opacity: 0;
+  right: 20px;
+  transform-origin: right;
+}
+.atc-trace-1 { top: 4px;  width: 16px; }
+.atc-trace-2 { top: 10px; width: 10px; }
+
+.atc-btn.atc-loading .atc-trace-1,
+.atc-btn.atc-loading .atc-trace-2 {
+  animation: atc-trace-anim 0.4s ease forwards;
+}
+/* .atc-btn.atc-loading .atc-trace-2 {
+  animation-delay: 0.05s;
+} */
+@keyframes atc-trace-anim {
+  0%      { opacity: 0;   transform: scaleX(0.2); }
+  10%,70% { opacity: 0.5; transform: scaleX(1); }
+  90%     { opacity: 0.1; transform: scaleX(1); }
+  100%    { opacity: 0;   transform: scaleX(0); }
+}
+
+/* ── IDLE content ── */
+.atc-idle-content {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  opacity: 1;
+  transform: translateY(0);
+  transition: opacity 0.2s ease, transform 0.2s ease;
+  white-space: nowrap;
+}
+.atc-btn.atc-loading .atc-idle-content,
+.atc-btn.atc-added .atc-idle-content {
+  opacity: 0;
+  transform: translateY(-10px);
+  pointer-events: none;
+  position: absolute;
+}
+
+/* Plus rotate on hover */
+.atc-plus {
+  transition: transform 0.3s cubic-bezier(0.5, 1, 0.3, 1.6);
+}
+.atc-btn:hover .atc-plus {
+  transform: rotate(90deg) scale(1.2);
+}
+
+/* ── Letter spans ── */
+.atc-letters {
+  display: flex;
+  align-items: center;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.atc-letters span {
+  display: block;
+  opacity: 0;
+  animation: atc-slide-down 0.7s ease forwards calc(var(--i) * 0.03s);
+}
+.atc-btn:hover .atc-letters span {
+  animation: atc-wave 0.45s ease forwards calc(var(--i) * 0.03s);
+  opacity: 1;
+}
+.atc-btn.atc-loading .atc-idle-content .atc-letters span {
+  animation: atc-disappear 0.4s ease forwards calc(var(--i) * 0.04s);
+  opacity: 1;
+}
+
+@keyframes atc-slide-down {
+  0%   { opacity: 0; transform: translateY(14px); filter: blur(3px); }
+  35%  { opacity: 1; transform: translateY(-2px); filter: blur(0); }
+  100% { opacity: 1; transform: translateY(0); }
+}
+@keyframes atc-wave {
+  30%  { opacity: 1; transform: translateY(3px); }
+  65%  { opacity: 1; transform: translateY(-2px); }
+  100% { opacity: 1; transform: translateY(0); }
+}
+@keyframes atc-disappear {
+  0%   { opacity: 1; transform: translateY(0); }
+  100% { opacity: 0; transform: translateY(-14px); filter: blur(3px); }
+}
+
+/* ── ADDED content ── */
+.atc-added-content {
+  position: absolute;
+  z-index: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  opacity: 0;
+  color: #fff;
+  pointer-events: none;
+  white-space: nowrap;
+}
+.atc-btn.atc-added .atc-added-content {
+  opacity: 1;
+}
+.atc-btn.atc-added .atc-added-content .atc-letters span {
+  animation: atc-slide-down 1s ease forwards calc(var(--i) * 0.07s);
+  opacity: 0;
+}
+
+/* Check icon draw */
+.atc-check-icon {
+  opacity: 0;
+  transform: scale(2);
+  filter: blur(2px);
+}
+.atc-btn.atc-added .atc-check-icon {
+  animation: atc-check-pop 0.6s cubic-bezier(0.34, 1.5, 0.64, 1) forwards 0.05s;
+}
+@keyframes atc-check-pop {
+  0%   { opacity: 0; transform: scale(2);    filter: blur(2px); }
+  60%  { opacity: 1; transform: scale(0.85); filter: blur(0); }
+  100% { opacity: 1; transform: scale(1);    filter: blur(0); }
+}

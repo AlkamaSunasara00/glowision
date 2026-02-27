@@ -1,3 +1,5 @@
+
+
 export const PRODUCTS = [
   {
     id: 1,
@@ -224,3 +226,101 @@ export const PRODUCTS = [
     ],
   },
 ];
+
+// ── Full product detail (used on /products/[id] page) ──
+export const PRODUCT_DETAIL = {
+  id: 1,
+  name: "Ayatul Kursi Gold Frame",
+  price: 1299,
+  originalPrice: 1799,
+  rating: 4.8,
+  reviews: 124,
+  category: "Islamic Wall Art",
+  description:
+    "A masterpiece of Islamic artistry, this Ayatul Kursi frame features precision laser-cut Arabic calligraphy finished in 24K gold plating. Crafted from premium solid wood, each frame is hand-inspected to ensure flawless detail and lasting beauty.",
+  description2:
+    "The frame arrives fully assembled with mounting hardware included. Its timeless design makes it a perfect centerpiece for any room, blending spiritual significance with refined aesthetic elegance that elevates your living space.",
+
+  // Each color variant has its own set of images
+  colors: [
+    {
+      name: "Gold",
+      hex: "#D4A843",
+      images: [
+        "/hero-images/hero1.jpg",
+        "/hero-images/hero1.jpg",
+        "/hero-images/hero1.jpg",
+        "/hero-images/hero1.jpg",
+        "/hero-images/hero1.jpg",
+        // "https://images.unsplash.com/photo-1578662996442-48f60103fc96?w=800&q=80",
+        // "https://images.unsplash.com/photo-1540479859555-17af45c78602?w=800&q=80",
+        // "https://images.unsplash.com/photo-1490750967868-88df5691cc38?w=800&q=80",
+      ],
+    },
+    {
+      name: "Silver",
+      hex: "#9CA3AF",
+      images: [
+        // "https://images.unsplash.com/photo-1578662996442-48f60103fc96?w=800&q=80",
+        // "https://images.unsplash.com/photo-1609599006353-e629aaabfeae?w=800&q=80",
+        // "https://images.unsplash.com/photo-1490750967868-88df5691cc38?w=800&q=80",
+                "/hero-images/hero1.jpg",
+        "/hero-images/hero1.jpg",
+        "/hero-images/hero1.jpg",
+        "/hero-images/hero1.jpg",
+        "/hero-images/hero1.jpg",
+      ],
+    },
+    {
+      name: "Black",
+      hex: "#1F2937",
+      images: [
+        // "https://images.unsplash.com/photo-1540479859555-17af45c78602?w=800&q=80",
+        // "https://images.unsplash.com/photo-1490750967868-88df5691cc38?w=800&q=80",
+        // "https://images.unsplash.com/photo-1578662996442-48f60103fc96?w=800&q=80",
+                "/hero-images/hero1.jpg",
+        "/hero-images/hero1.jpg",
+        "/hero-images/hero1.jpg",
+        "/hero-images/hero5.jpeg",
+        "/hero-images/hero6.jpeg",
+        "/hero-images/hero7.jpeg",
+      ],
+    },
+    {
+      name: "Rose Gold",
+      hex: "#C4806A",
+      images: [
+        // "https://images.unsplash.com/photo-1490750967868-88df5691cc38?w=800&q=80",
+        // "https://images.unsplash.com/photo-1609599006353-e629aaabfeae?w=800&q=80",
+        "/hero-images/hero3.webp",
+        "/hero-images/hero4.jpg",
+      ],
+    },
+    {
+      name: "Ivory",
+      hex: "#E8DCC8",
+      images: [
+        // "https://images.unsplash.com/photo-1579547621113-e4bb2a19bdd6?w=800&q=80",
+        // "https://images.unsplash.com/photo-1540479859555-17af45c78602?w=800&q=80",
+                        "/hero-images/hero1.jpg",
+        "/hero-images/hero1.jpg",
+        "/hero-images/hero2.jpg",
+        
+      ],
+    },
+  ],
+
+  specifications: [
+    "Dimensions: 60cm (H) x 45cm (W) x 2cm (D)",
+    "Material: Solid Sheesham Wood + Gold Plating",
+    "Arabic Script: Ayatul Kursi — Surah Al-Baqarah 2:255",
+    "Finish: Hand-polished 24K gold leaf",
+    "Mounting: Wall-ready with included hardware",
+  ],
+  features: [
+    "Precision CNC laser-cut calligraphy",
+    "UV-resistant coating for lasting shine",
+    "Comes in premium gift packaging",
+    "Certificate of authenticity included",
+  ],
+};

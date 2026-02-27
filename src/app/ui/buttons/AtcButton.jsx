@@ -1,7 +1,8 @@
 "use client";
 
 import { useState } from "react";
-import { ShoppingCart, Check } from "lucide-react";
+import { ShoppingCart, Plus, Check } from "lucide-react";
+import "./atcButton.css";
 
 export default function AddToCartButton({ onClick, className = "", style = {} }) {
   const [phase, setPhase] = useState("idle"); // "idle" | "loading" | "added"
@@ -12,7 +13,7 @@ export default function AddToCartButton({ onClick, className = "", style = {} })
     if (phase !== "idle") return;
     if (onClick) onClick(e);
     setPhase("loading");
-    setTimeout(() => setPhase("added"), 1800);
+    setTimeout(() => setPhase("added"), 1500);
   };
 
   return (
@@ -21,24 +22,39 @@ export default function AddToCartButton({ onClick, className = "", style = {} })
       className={`atc-btn ${phase === "loading" ? "atc-loading" : ""} ${phase === "added" ? "atc-added" : ""} ${className}`}
       style={style}
     >
-      {/* Progress track — fills left to right */}
+      {/* Progress track */}
       <span className="atc-track" />
 
-      {/* Sliding cart icon */}
+      {/* Sliding cart */}
       <span className="atc-cart-slider">
-        <ShoppingCart size={16} />
+        <ShoppingCart size={18} className="atc-cart-icon" />
+        <span className="atc-trace atc-trace-1" />
+        <span className="atc-trace atc-trace-2" />
       </span>
 
-      {/* IDLE text */}
+      {/* IDLE */}
       <span className="atc-idle-content">
         <ShoppingCart size={14} />
-        <span>Add to Cart</span>
+        <Plus size={11} className="atc-plus" />
+        <p className="atc-letters">
+          {"Add to cart".split("").map((char, i) => (
+            <span key={i} style={{ "--i": i }}>
+              {char === " " ? "\u00A0" : char}
+            </span>
+          ))}
+        </p>
       </span>
 
-      {/* ADDED content */}
+      {/* ADDED */}
       <span className="atc-added-content">
-        <Check size={14} strokeWidth={3} />
-        <span>Added!</span>
+        <Check size={16} strokeWidth={3} className="atc-check-icon" />
+        <p className="atc-letters">
+          {"Added!".split("").map((char, i) => (
+            <span key={i} style={{ "--i": i + 5 }}>
+              {char}
+            </span>
+          ))}
+        </p>
       </span>
     </button>
   );

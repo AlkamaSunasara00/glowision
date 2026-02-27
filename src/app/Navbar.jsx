@@ -5,12 +5,13 @@ import {
   Search,
   User,
   Heart,
-  ShoppingBag,
+  ShoppingCart,
   Menu,
   X,
   ChevronDown,
 } from "lucide-react";
 import { Poppins, Inter } from "next/font/google";
+import Link from "next/link";
 
 const heading = Poppins({ subsets: ["latin"], weight: ["600", "700"] });
 const body = Inter({ subsets: ["latin"], weight: ["400", "500"] });
@@ -91,7 +92,10 @@ function NavItem({ item }) {
         className={`${body.className} flex items-center gap-1 text-[13.5px] font-medium text-[var(--color-text-secondary)] hover:text-[var(--color-blue)]`}
       >
         {item.label}
-        <ChevronDown size={14} className={open ? "rotate-180 transition" : ""} />
+        <ChevronDown
+          size={14}
+          className={open ? "rotate-180 transition" : ""}
+        />
       </button>
       {open && <Dropdown items={item.children} />}
     </div>
@@ -132,12 +136,17 @@ export default function Navbar() {
           {/* Desktop Icons */}
           <div className="hidden md:flex justify-end gap-5 w-[33%]">
             <User className="hover:text-[var(--color-blue)] cursor-pointer transition" />
-            <Heart className="hover:text-[var(--color-blue)] cursor-pointer transition" />
-            <ShoppingBag className="hover:text-[var(--color-blue)] cursor-pointer transition" />
+            <Link href={"/wishlist-items"}>
+              <Heart className="hover:text-[var(--color-blue)] cursor-pointer transition" />
+            </Link>
+            <ShoppingCart className="hover:text-[var(--color-blue)] cursor-pointer transition" />
           </div>
 
           {/* Mobile Icons */}
           <div className="md:hidden flex items-center gap-4">
+            <Link href={"/wishlist-items"}>
+              <Heart className="hover:text-[var(--color-blue)] cursor-pointer transition" />
+            </Link>
             <button onClick={() => setSidebarOpen(true)} aria-label="Open menu">
               <Menu />
             </button>
@@ -156,7 +165,10 @@ export default function Navbar() {
       {sidebarOpen && (
         <div
           className="fixed inset-0 z-40"
-          style={{ background: "rgba(10,14,28,0.45)", backdropFilter: "blur(4px)" }}
+          style={{
+            background: "rgba(10,14,28,0.45)",
+            backdropFilter: "blur(4px)",
+          }}
           onClick={() => setSidebarOpen(false)}
         />
       )}
