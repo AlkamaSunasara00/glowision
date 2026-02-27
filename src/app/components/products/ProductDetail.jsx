@@ -220,21 +220,30 @@ export default function ProductDetailPage() {
     const colorName = PRODUCT.colors[selectedColor].name;
     const total = PRODUCT.price * quantity;
     const productUrl = `${window.location.origin}/products/${PRODUCT.id}`;
-    const message = [
-      `🛒 *Order Inquiry — Glowison*`,
-      ``,
-      `*Product:* ${PRODUCT.name}`,
-      `*Category:* ${PRODUCT.category}`,
-      `*Color:* ${colorName}`,
-      `*Size:* ${selectedSize}`,
-      `*Price:* ₹${PRODUCT.price.toLocaleString()} (MRP ₹${PRODUCT.originalPrice.toLocaleString()})`,
-      `*Quantity:* ${quantity}`,
-      `*Total:* ₹${total.toLocaleString()}`,
-      ``,
-      `🔗 *Product Link:* ${productUrl}`,
-      ``,
-      `Please confirm availability and share payment details. Thank you! 😊`,
-    ].join("\n");
+    const message = `
+🛒 GLOWISON PURCHASE REQUEST
+━━━━━━━━━━━━━━━━━━━━━━
+
+🛍 Product Information
+Product Name : ${PRODUCT.name}
+Category : ${PRODUCT.category}
+Color : ${colorName}
+Size  : ${selectedSize}
+
+💰 Pricing Summary
+Unit Price   : ₹${PRODUCT.price.toLocaleString()}
+MRP          : ₹${PRODUCT.originalPrice.toLocaleString()}
+Quantity     : ${quantity}
+Total Amount : ₹${total.toLocaleString()}
+
+🔗 Product Link:
+${productUrl}
+
+Please confirm availability and share payment details.
+
+Thank you. 😊
+━━━━━━━━━━━━━━━━━━━━━━
+`;
     window.open(
       `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(message)}`,
       "_blank",
