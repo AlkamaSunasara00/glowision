@@ -1,14 +1,15 @@
 "use client";
-
 import { useState, useRef, useEffect } from "react";
 import { Home, LayoutGrid, FileText, Phone, Search, X } from "lucide-react";
+import { useRouter,usePathname } from "next/navigation";
+
 
 const TABS = [
-  { id: "home", label: "Home", icon: Home },
-  { id: "products", label: "Products", icon: LayoutGrid },
-  { id: "search", label: "Search", icon: Search },
-  { id: "quote", label: "Quote", icon: FileText },
-  { id: "contact", label: "Contact", icon: Phone },
+  { id: "home",     label: "Home",     icon: Home,       href: "/" },
+  { id: "products", label: "Products", icon: LayoutGrid, href: "/products" },
+  { id: "search",   label: "Search",   icon: Search,     href: null },
+  { id: "quote",    label: "Quote",    icon: FileText,   href: "/quote" },
+  { id: "contact",  label: "Contact",  icon: Phone,      href: "/contact" },
 ];
 
 const DEFAULT_SUGGESTIONS = [
@@ -35,7 +36,9 @@ const ALL_SUGGESTIONS = [
 ];
 
 export default function BottomTabBar() {
-  const [active, setActive] = useState("home");
+const pathname = usePathname();
+const router = useRouter();
+const [active, setActive] = useState("home");
   const [searchOpen, setSearchOpen] = useState(false);
   const [query, setQuery] = useState("");
   const [suggestions, setSuggestions] = useState(DEFAULT_SUGGESTIONS);
@@ -58,15 +61,28 @@ export default function BottomTabBar() {
     }
   }, [searchOpen]);
   
+  useEffect(() => {
+  if (pathname.startsWith("/products")) {
+    setActive("products");
+  } else if (pathname === "/") {
+    setActive("home");
+  } else if (pathname.startsWith("/quote")) {
+    setActive("quote");
+  } else if (pathname.startsWith("/contact")) {
+    setActive("contact");
+  }
+}, [pathname]);
+
 
   const handleTabClick = (tab) => {
-    if (tab.id === "search") {
-      setSearchOpen(true);
-    } else {
-      setActive(tab.id);
-      setSearchOpen(false);
-    }
-  };
+  if (tab.id === "search") {
+    setSearchOpen(true);
+  } else {
+    setActive(tab.id);
+    setSearchOpen(false);
+    if (tab.href) router.push(tab.href);  // ← redirect
+  }
+};
 
   const closeSearch = () => {
     setSearchOpen(false);

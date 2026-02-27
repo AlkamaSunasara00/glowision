@@ -108,3 +108,160 @@ a {
 .animate-fadeUp {
   animation: fadeUp .6s ease forwards;
 }
+
+
+
+/* =============================================
+   AddToCartButton — paste into globals.css
+   ============================================= */
+
+/* ── Base ── */
+.atc-btn {
+  position: relative;
+  overflow: hidden;
+  width: 100%;
+  height: 40px;
+  padding: 0 16px;
+  border-radius: 12px;
+  border: none;
+  cursor: pointer;
+  font-family: "DM Sans", sans-serif;
+  font-weight: 700;
+  font-size: 13px;
+  background: var(--color-gold);
+  color: var(--color-blue-dark);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  transition: background 0.4s ease, box-shadow 0.2s ease, transform 0.2s ease;
+  -webkit-tap-highlight-color: transparent;
+  user-select: none;
+}
+
+.atc-btn:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 6px 18px rgba(242, 180, 97, 0.45);
+}
+.atc-btn:active {
+  transform: scale(0.97);
+}
+.atc-btn.atc-loading:hover,
+.atc-btn.atc-added:hover {
+  transform: none;
+}
+
+/* ── ADDED state ── */
+.atc-btn.atc-added {
+  background: #22c55e;
+  color: #fff;
+  box-shadow: 0 4px 14px rgba(34, 197, 94, 0.35);
+}
+
+/* ── Progress track (fills left→right behind cart) ── */
+.atc-track {
+  position: absolute;
+  left: 0;
+  top: 0;
+  height: 100%;
+  width: 0%;
+  background: rgba(36, 46, 74, 0.12);
+  border-radius: inherit;
+  z-index: 0;
+  transition: none;
+}
+.atc-btn.atc-loading .atc-track {
+  animation: atc-track-fill 1.65s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+}
+.atc-btn.atc-added .atc-track {
+  width: 0%;
+}
+
+@keyframes atc-track-fill {
+  0%   { width: 0%; }
+  100% { width: 100%; }
+}
+
+/* ── Sliding cart icon ── */
+.atc-cart-slider {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%) translateX(-120%);
+  z-index: 2;
+  color: var(--color-blue-dark);
+  opacity: 0;
+  pointer-events: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.atc-btn.atc-loading .atc-cart-slider {
+  opacity: 1;
+  animation: atc-cart-slide 1.65s cubic-bezier(0.4, 0, 0.6, 1) forwards;
+}
+.atc-btn.atc-added .atc-cart-slider {
+  opacity: 0;
+}
+
+@keyframes atc-cart-slide {
+  0%   { transform: translateY(-50%) translateX(-30px); opacity: 1; }
+  15%  { opacity: 1; }
+  85%  { opacity: 1; }
+  100% { transform: translateY(-50%) translateX(calc(100% + 60px)); opacity: 0; }
+}
+
+/* Need button width for the slide — use a CSS trick with left instead */
+.atc-btn.atc-loading .atc-cart-slider {
+  left: 0;
+  animation: atc-cart-slide-pos 1.65s cubic-bezier(0.25, 0.1, 0.25, 1) forwards;
+}
+
+@keyframes atc-cart-slide-pos {
+  0%   { left: -20px;        opacity: 0; transform: translateY(-50%); }
+  5%   { left: 0px;          opacity: 1; transform: translateY(-50%); }
+  90%  { left: calc(100% - 20px); opacity: 1; transform: translateY(-50%); }
+  100% { left: calc(100% + 4px);  opacity: 0; transform: translateY(-50%); }
+}
+
+/* ── IDLE content ── */
+.atc-idle-content {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  opacity: 1;
+  transform: translateY(0);
+  transition: opacity 0.2s ease, transform 0.2s ease;
+  white-space: nowrap;
+}
+.atc-btn.atc-loading .atc-idle-content {
+  opacity: 0;
+  transform: translateY(-10px);
+}
+.atc-btn.atc-added .atc-idle-content {
+  opacity: 0;
+  position: absolute;
+}
+
+/* ── ADDED content ── */
+.atc-added-content {
+  position: absolute;
+  z-index: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  opacity: 0;
+  transform: translateY(8px) scale(0.9);
+  color: #fff;
+  pointer-events: none;
+  white-space: nowrap;
+  transition: none;
+}
+.atc-btn.atc-added .atc-added-content {
+  opacity: 1;
+  transform: translateY(0) scale(1);
+  transition: opacity 0.3s ease 0.1s, transform 0.35s cubic-bezier(0.34, 1.5, 0.64, 1) 0.1s;
+}

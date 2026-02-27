@@ -1,9 +1,21 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Heart, ShoppingBag, Star, ArrowRight, Eye } from "lucide-react";
+import { useRouter } from "next/navigation";
+import { Heart, ShoppingBag, Star } from "lucide-react";
 import { PRODUCTS } from "@/app/data/productsData";
 import { ArrowDown } from "lucide-react";
+import AddToCartButton from "@/app/ui/buttons/AtcButton";
+
+// Badge color map
+const BADGE_STYLES = {
+  "Best Seller": { bg: "#1a2e6e", color: "#fff" },
+  New: { bg: "#16a34a", color: "#fff" },
+  Sale: { bg: "#dc2626", color: "#fff" },
+  Premium: { bg: "#92400e", color: "#fff" },
+  Limited: { bg: "#7c3aed", color: "#fff" },
+  Popular: { bg: "#0369a1", color: "#fff" },
+};
 
 function HeartParticles({ active }) {
   const particles = Array.from({ length: 10 });
@@ -72,6 +84,7 @@ function StarRating({ rating }) {
 }
 
 function ProductCard({ product }) {
+  const router = useRouter();
   const [hovered, setHovered] = useState(false);
   const [wishlisted, setWishlisted] = useState(false);
   const [addedToCart, setAddedToCart] = useState(false);
@@ -79,15 +92,15 @@ function ProductCard({ product }) {
   const [isMobile, setIsMobile] = useState(false);
 
   useEffect(() => {
-    const checkScreen = () => {
-      setIsMobile(window.innerWidth < 1024);
-    };
-
-    checkScreen(); // run once
+    const checkScreen = () => setIsMobile(window.innerWidth < 1024);
+    checkScreen();
     window.addEventListener("resize", checkScreen);
-
     return () => window.removeEventListener("resize", checkScreen);
   }, []);
+
+  const handleCardClick = () => {
+    router.push(`/products/${product.id}`);
+  };
 
   const handleWishlist = (e) => {
     e.preventDefault();
@@ -101,12 +114,23 @@ function ProductCard({ product }) {
 
   const handleCart = (e) => {
     e.preventDefault();
+    e.stopPropagation();
     setAddedToCart(true);
     setTimeout(() => setAddedToCart(false), 1800);
   };
 
+  const discount = Math.round(
+    ((product.originalPrice - product.price) / product.originalPrice) * 100,
+  );
+
+  const badgeStyle = BADGE_STYLES[product.badge] || {
+    bg: "#475792",
+    color: "#fff",
+  };
+
   return (
     <div
+      onClick={handleCardClick}
       onMouseEnter={() => setHovered(true)}
       onMouseLeave={() => setHovered(false)}
       style={{
@@ -120,7 +144,6 @@ function ProductCard({ product }) {
         position: "relative",
         display: "flex",
         flexDirection: "column",
-        gap:"0px",
       }}
     >
       {/* ================= IMAGE ================= */}
@@ -146,7 +169,6 @@ function ProductCard({ product }) {
             transition: "all 0.5s ease",
           }}
         />
-
         <img
           src={product.images[1]}
           alt={product.name + " alt"}
@@ -162,20 +184,58 @@ function ProductCard({ product }) {
           }}
         />
 
-        {/* Wishlist + Quick View */}
+        {/* Badge — top left */}
+        {product.badge && (
+          <div
+            style={{
+              position: "absolute",
+              top: "10px",
+              left: "10px",
+              background: badgeStyle.bg,
+              color: badgeStyle.color,
+              fontFamily: "'DM Sans', sans-serif",
+              fontSize: "10px",
+              fontWeight: 700,
+              letterSpacing: "0.6px",
+              textTransform: "uppercase",
+              padding: "4px 10px",
+              borderRadius: "999px",
+              zIndex: 5,
+              boxShadow: "0 2px 8px rgba(0,0,0,0.18)",
+            }}
+          >
+            {product.badge}
+          </div>
+        )}
+
+        {/* Discount % — top right */}
         <div
           style={{
             position: "absolute",
-            right: "12px",
-            top: "12px",
-            display: "flex",
-            flexDirection: "column",
-            gap: "8px",
+            top: "10px",
+            right: "10px",
+            background: "#fff",
+            color: "#dc2626",
+            fontFamily: "'DM Sans', sans-serif",
+            fontSize: "11px",
+            fontWeight: 700,
+            padding: "4px 8px",
+            borderRadius: "999px",
             zIndex: 5,
-            opacity: isMobile ? 1 : hovered ? 1 : 0,
-            transform:
-              hovered || isMobile ? "translateX(0)" : "translateX(20px)",
-            transition: "all 0.3s cubic-bezier(0.34,1.3,0.64,1)",
+            boxShadow: "0 2px 8px rgba(0,0,0,0.1)",
+            border: "1px solid #fecaca",
+          }}
+        >
+          -{discount}%
+        </div>
+
+        {/* Wishlist button — below discount */}
+        <div
+          style={{
+            position: "absolute",
+            top: "46px",
+            right: "10px",
+            zIndex: 5,
           }}
         >
           <div style={{ position: "relative" }}>
@@ -189,7 +249,7 @@ function ProductCard({ product }) {
                 background: wishlisted ? "#fff1f1" : "rgba(255,255,255,0.95)",
                 border: wishlisted
                   ? "1.5px solid #fca5a5"
-                  : "1.5px solid rgba(255,255,255,0.6)",
+                  : "1.5px solid rgba(200,200,200,0.6)",
                 display: "flex",
                 alignItems: "center",
                 justifyContent: "center",
@@ -209,24 +269,6 @@ function ProductCard({ product }) {
               />
             </button>
           </div>
-
-          <button
-            style={{
-              width: "38px",
-              height: "38px",
-              borderRadius: "50%",
-              background: "rgba(255,255,255,0.95)",
-              border: "none",
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              cursor: "pointer",
-              boxShadow: "0 2px 12px rgba(0,0,0,0.12)",
-              transition: "all 0.2s ease",
-            }}
-          >
-            <Eye size={16} style={{ color: "#475792" }} />
-          </button>
         </div>
       </div>
 
@@ -317,35 +359,9 @@ function ProductCard({ product }) {
           </span>
         </div>
 
-        {/* ================= ADD TO CART (Moved Here) ================= */}
-        <div
-          style={{
-            marginTop: "auto",
-          }}
-        >
-          <button
-            onClick={handleCart}
-            style={{
-              width: "100%",
-              padding: "10px",
-              borderRadius: "12px",
-              background: addedToCart ? "#22c55e" : "var(--color-gold)",
-              color: addedToCart ? "#fff" : "var(--color-blue-dark)",
-              border: "none",
-              fontFamily: "'DM Sans', sans-serif",
-              fontWeight: 700,
-              fontSize: "13px",
-              cursor: "pointer",
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              gap: "6px",
-              transition: "background 0.3s ease",
-            }}
-          >
-            <ShoppingBag size={14} />
-            {addedToCart ? "Added!" : "Add to Cart"}
-          </button>
+        {/* Add to Cart */}
+        <div style={{ marginTop: "auto" }}>
+          <AddToCartButton onClick={handleCart} />
         </div>
       </div>
     </div>
@@ -354,24 +370,16 @@ function ProductCard({ product }) {
 
 export default function ProductsSection() {
   const [visibleCount, setVisibleCount] = useState(4);
-    const [isMobile, setIsMobile] = useState(false);
+  const [isMobile, setIsMobile] = useState(false);
 
   useEffect(() => {
-    const checkScreen = () => {
-      setIsMobile(window.innerWidth < 1024);
-    };
-
-    checkScreen(); // run once
+    const checkScreen = () => setIsMobile(window.innerWidth < 1024);
+    checkScreen();
     window.addEventListener("resize", checkScreen);
-
     return () => window.removeEventListener("resize", checkScreen);
   }, []);
 
   const visibleProducts = PRODUCTS.slice(0, visibleCount);
-
-  const handleLoadMore = () => {
-    setVisibleCount((prev) => prev + 4);
-  };
 
   return (
     <>
@@ -386,7 +394,11 @@ export default function ProductsSection() {
         style={{ background: "var(--color-bg-main)", padding: "72px 0 80px" }}
       >
         <div
-          style={{ maxWidth: "1280px", margin: "0 auto", padding: isMobile ? "0 10px" : "0 24px" }}
+          style={{
+            maxWidth: "1280px",
+            margin: "0 auto",
+            padding: isMobile ? "0 10px" : "0 24px",
+          }}
         >
           {/* Section Header */}
           <div
@@ -501,7 +513,7 @@ export default function ProductsSection() {
             ))}
           </div>
 
-          {/* Load More Button */}
+          {/* Load More */}
           {visibleCount < PRODUCTS.length && (
             <div
               style={{
@@ -511,7 +523,7 @@ export default function ProductsSection() {
               }}
             >
               <button
-                onClick={handleLoadMore}
+                onClick={() => setVisibleCount((prev) => prev + 4)}
                 style={{
                   display: "inline-flex",
                   alignItems: "center",
@@ -519,7 +531,7 @@ export default function ProductsSection() {
                   padding: "14px 36px",
                   borderRadius: "999px",
                   background: "var(--color-blue-dark)",
-                  color: " white",
+                  color: "white",
                   fontFamily: "'DM Sans', sans-serif",
                   fontWeight: 700,
                   fontSize: "14px",

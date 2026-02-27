@@ -108,7 +108,7 @@ export default function Navbar() {
 
   return (
     <>
-      <header className="sticky top-0 z-50 bg-white border-b border-[var(--color-border)] shadow-sm">
+      <header className=" z-50 bg-white border-b border-[var(--color-border)] shadow-sm">
         {/* Top Row */}
         <div className="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
           {/* Logo */}
