@@ -203,7 +203,7 @@ function DesktopSearch({ open, onClose }) {
                         <span className="text-[14px] font-medium text-text-primary group-hover/r:text-blue transition-colors">
                           {s.split(new RegExp(`(${query})`, "gi")).map((p, i) =>
                             p.toLowerCase() === query.toLowerCase()
-                              ? <span key={i} className="text-blue font-bold">{p}</span>
+                              ? <span key={i} className="text-gold font-bold">{p}</span>
                               : <span key={i}>{p}</span>
                           )}
                         </span>
@@ -458,9 +458,11 @@ export default function Navbar() {
         <div className="max-w-7xl mx-auto px-5 md:px-8 py-3 flex items-center justify-between gap-4">
 
           {/* Logo */}
+          <Link href={"/"}>
           <div className="shrink-0">
             <img src="/logos/logo1.png" alt="Glowison" className="h-11 w-auto object-contain" />
           </div>
+          </Link>
 
           {/* Desktop Search Bar */}
           <button

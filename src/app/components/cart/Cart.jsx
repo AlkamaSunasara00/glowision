@@ -257,14 +257,14 @@ export default function CartPage() {
         <div className="max-w-7xl mx-auto px-4 md:px-6">
 
           {/* Breadcrumb */}
-          <nav className="flex items-center gap-1.5 text-[13px] mb-6 flex-wrap">
+          <nav className="flex items-center gap-1.5 text-[16px] mb-3 flex-wrap pb-6 border-b border-border ">
             <Link href="/" className="text-text-secondary hover:text-blue transition-colors">Home</Link>
             <ChevronRight size={12} className="text-text-secondary" />
             <span className="text-text-primary font-medium">Cart</span>
           </nav>
 
           <h1 className="font-bold text-blue-dark mb-8" style={{ fontFamily: "'Playfair Display', serif", fontSize: "clamp(24px, 3vw, 36px)" }}>
-            Your <span className="text-gold">Cart</span>
+            Your Shopping <span className="text-gold">Cart</span>
           </h1>
 
           {cart.length === 0 ? (

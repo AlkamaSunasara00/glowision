@@ -263,10 +263,10 @@ export default function WishlistPage() {
       `}</style>
 
       <section className="bg-[var(--color-bg-main)] min-h-screen pt-6 pb-28">
-        <div className="max-w-[860px] mx-auto px-4 md:px-6">
+        <div className=" px-4 md:px-6">
 
           {/* Breadcrumb */}
-          <nav className="flex items-center gap-1.5 text-[13px] mb-6 flex-wrap font-['DM_Sans']">
+          <nav className="flex items-center gap-1.5 text-[16px] mb-3 flex-wrap font-['DM_Sans'] pb-6 border-b border-border">
             <Link href="/" className="text-[var(--color-text-secondary)] hover:text-[var(--color-blue)] transition-colors">
               Home
             </Link>

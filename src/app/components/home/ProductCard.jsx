@@ -258,13 +258,13 @@ export default function ProductsSection() {
 useEffect(() => {
   const updateVisibleCount = () => {
     if (window.innerWidth >= 1024) {
-      setVisibleCount(8);   // Desktop
+      setVisibleCount((prev) => Math.max(prev, 8));  // 🆕 never shrink below current
     } else {
-      setVisibleCount(4);   // Mobile & Tablet
+      setVisibleCount((prev) => Math.max(prev, 4));  // 🆕 never shrink below current
     }
   };
 
-  updateVisibleCount(); // run on mount
+  updateVisibleCount();
 
   window.addEventListener("resize", updateVisibleCount);
   return () => window.removeEventListener("resize", updateVisibleCount);

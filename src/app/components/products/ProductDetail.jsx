@@ -248,7 +248,7 @@ export default function ProductDetailPage() {
       <div className="min-h-screen bg-bg-main">
         <div className="max-w-7xl mx-auto px-4 md:px-6 py-6">
           {/* Breadcrumb */}
-          <nav className="flex items-center gap-1.5 text-[13px] mb-6 flex-wrap">
+          <nav className="flex items-center gap-1.5 text-[16px] mb-3 flex-wrap pb-6 border-b border-border">
             <Link
               href="/"
               className="text-text-secondary hover:text-blue transition-colors"

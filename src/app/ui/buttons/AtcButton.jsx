@@ -5,9 +5,8 @@ import { ShoppingCart, Plus, Check } from "lucide-react";
 import "./atcButton.css";
 
 export default function AddToCartButton({ product, onClick, className = "", style = {} }) {
-  const [phase, setPhase] = useState("idle"); // "idle" | "loading" | "added"
+  const [phase, setPhase] = useState("idle");
 
-  // If product already in cart on mount, show "added" state
   useEffect(() => {
     if (!product) return;
     const cart = JSON.parse(localStorage.getItem("glowison_cart") || "[]");
@@ -25,28 +24,26 @@ export default function AddToCartButton({ product, onClick, className = "", styl
       const exists = cart.some((i) => i.id === product.id);
       if (!exists) {
         const item = {
-          id: product.id,
-          name: product.name,
-          category: product.category,
-          price: product.price,
+          id:            product.id,
+          name:          product.name,
+          category:      product.category,
+          price:         product.price,
           originalPrice: product.originalPrice,
-          images: product.images || [],
-          badge: product.badge || null,
-          rating: product.rating || null,
-          reviews: product.reviews || null,
+          images:        product.images || [],
+          badge:         product.badge        || null,
+          rating:        product.rating       || null,
+          reviews:       product.reviews      || null,
           selectedColor: product.selectedColor || null,
-          qty: product.qty || 1,
+          qty:           product.qty          || 1,
         };
         localStorage.setItem("glowison_cart", JSON.stringify([...cart, item]));
-
-        // 🆕 Notify TabBar to update cart badge
         window.dispatchEvent(new Event("cartUpdate"));
       }
     }
 
     if (onClick) onClick(e);
     setPhase("loading");
-    setTimeout(() => setPhase("added"), 1500);
+    setTimeout(() => setPhase("added"), 1000); // ⚡ reduced from 1500 → 1000
   };
 
   return (
