@@ -20,11 +20,11 @@ import {
 import Link from "next/link";
 import { PRODUCTS, PRODUCT_DETAIL } from "@/app/data/productsData";
 import AddToCartButton from "@/app/ui/buttons/AtcButton";
+import BuyNowButton from "@/app/ui/buttons/BuyNowButton";
 
 const PRODUCT = PRODUCT_DETAIL;
 const SIZES = PRODUCT.sizes || ["16 x 18", "18 x 20", "24 x 27"];
 const SIMILAR = PRODUCTS.slice(1, 5);
-const WHATSAPP_NUMBER = "919978750622";
 
 const BADGE_STYLES = {
   "Best Seller": { bg: "#1a2e6e", color: "#fff" },
@@ -41,20 +41,17 @@ const ALL_IMAGES = Array.from(
   ).values(),
 );
 
-// --- HELPER COMPONENTS (Defined outside is fine) ---
-
+// ── Wishlist Sparkles ─────────────────────────────────────────────────────────
 function WishlistSparkles({ active }) {
   if (!active) return null;
-  const sparks = Array.from({ length: 8 });
   return (
     <span className="pointer-events-none absolute inset-0">
-      {sparks.map((_, i) => {
-        const angle = (i / sparks.length) * 360;
+      {Array.from({ length: 8 }).map((_, i) => {
+        const angle = (i / 8) * 360;
         const rad = (angle * Math.PI) / 180;
         const tx = Math.cos(rad) * 22;
         const ty = Math.sin(rad) * 22;
         const colors = ["#ef4444", "#f97316", "#fbbf24", "#ec4899", "#fff"];
-        const color = colors[i % colors.length];
         return (
           <span
             key={i}
@@ -65,13 +62,13 @@ function WishlistSparkles({ active }) {
               width: "5px",
               height: "5px",
               borderRadius: "50%",
-              background: color,
+              background: colors[i % colors.length],
               transform: "translate(-50%,-50%)",
-              animation: `spark-${i} 0.55s ease-out forwards`,
+              animation: `spark-pdp-${i} 0.55s ease-out forwards`,
             }}
           >
             <style>{`
-              @keyframes spark-${i} {
+              @keyframes spark-pdp-${i} {
                 0%   { transform: translate(-50%,-50%) translate(0,0) scale(1); opacity:1; }
                 100% { transform: translate(-50%,-50%) translate(${tx}px,${ty}px) scale(0); opacity:0; }
               }
@@ -83,8 +80,8 @@ function WishlistSparkles({ active }) {
   );
 }
 
+// ── Star Row ──────────────────────────────────────────────────────────────────
 function StarRow({ rating, reviews }) {
-  const full = Math.floor(rating);
   return (
     <div className="flex items-center gap-2">
       <div className="flex items-center gap-0.5">
@@ -92,23 +89,22 @@ function StarRow({ rating, reviews }) {
           <Star
             key={s}
             size={14}
-            fill={s <= full ? "var(--color-gold)" : "none"}
-            color={s <= full ? "var(--color-gold)" : "#D1D5DB"}
+            fill={s <= Math.floor(rating) ? "#F2B461" : "none"}
+            color={s <= Math.floor(rating) ? "#F2B461" : "#D1D5DB"}
           />
         ))}
       </div>
-      <span className="text-[13px] font-semibold text-[var(--color-text-primary)]">
+      <span className="text-[13px] font-semibold text-text-primary">
         {rating} Star Rating
       </span>
-      <span className="text-[13px] text-[var(--color-text-secondary)]">
+      <span className="text-[13px] text-text-secondary">
         ({reviews} User feedback)
       </span>
     </div>
   );
 }
 
-// --- MAIN COMPONENT ---
-
+// ── Main Component ────────────────────────────────────────────────────────────
 export default function ProductDetailPage() {
   const [activeImage, setActiveImage] = useState(0);
   const [activeBtn, setActiveBtn] = useState(null);
@@ -123,57 +119,51 @@ export default function ProductDetailPage() {
   const sizeRef = useRef(null);
   const isAnimating = useRef(false);
 
-  // 1. Initial Load: Check if product is in wishlist
+  // Sync wishlist state on mount
   useEffect(() => {
-    const savedWishlist = JSON.parse(
-      localStorage.getItem("glowison_wishlist") || "[]",
-    );
-    const isPresent = savedWishlist.some((item) => item.id === PRODUCT.id);
-    setWishlisted(isPresent);
-  }, [PRODUCT.id]);
+    const saved = JSON.parse(localStorage.getItem("glowison_wishlist") || "[]");
+    setWishlisted(saved.some((item) => item.id === PRODUCT.id));
+  }, []);
 
-  // 2. Handle Wishlist Action
+  // Close size dropdown on outside click
+  useEffect(() => {
+    const handler = (e) => {
+      if (sizeRef.current && !sizeRef.current.contains(e.target))
+        setIsSizeOpen(false);
+    };
+    document.addEventListener("mousedown", handler);
+    return () => document.removeEventListener("mousedown", handler);
+  }, []);
+
   const handleWishlist = () => {
-    const savedWishlist = JSON.parse(
-      localStorage.getItem("glowison_wishlist") || "[]",
-    );
-
+    const saved = JSON.parse(localStorage.getItem("glowison_wishlist") || "[]");
     if (!wishlisted) {
       setSparkle(true);
       setTimeout(() => setSparkle(false), 600);
-
       const newItem = {
         id: PRODUCT.id,
         name: PRODUCT.name,
         price: PRODUCT.price,
         originalPrice: PRODUCT.originalPrice,
-        image: ALL_IMAGES[0],
+        images: ALL_IMAGES,
         category: PRODUCT.category,
+        rating: PRODUCT.rating,
+        reviews: PRODUCT.reviews,
+        badge: PRODUCT.badge || null,
       };
-
-      const updatedList = [...savedWishlist, newItem];
-      localStorage.setItem("glowison_wishlist", JSON.stringify(updatedList));
-      setWishlisted(true);
-    } else {
-      const updatedList = savedWishlist.filter(
-        (item) => item.id !== PRODUCT.id,
+      localStorage.setItem(
+        "glowison_wishlist",
+        JSON.stringify([...saved, newItem]),
       );
-      localStorage.setItem("glowison_wishlist", JSON.stringify(updatedList));
-      setWishlisted(false);
+    } else {
+      localStorage.setItem(
+        "glowison_wishlist",
+        JSON.stringify(saved.filter((i) => i.id !== PRODUCT.id)),
+      );
     }
+    setWishlisted((w) => !w);
     window.dispatchEvent(new Event("wishlistUpdate"));
   };
-
-  // Close size dropdown when clicking outside
-  useEffect(() => {
-    function handleClickOutside(event) {
-      if (sizeRef.current && !sizeRef.current.contains(event.target)) {
-        setIsSizeOpen(false);
-      }
-    }
-    document.addEventListener("mousedown", handleClickOutside);
-    return () => document.removeEventListener("mousedown", handleClickOutside);
-  }, []);
 
   const goNext = useCallback(() => {
     if (isAnimating.current) return;
@@ -208,7 +198,7 @@ export default function ProductDetailPage() {
       navigator.share({ title: PRODUCT.name, url });
     } else {
       navigator.clipboard.writeText(url);
-      alert("Link copied to clipboard!");
+      alert("Link copied!");
     }
   };
 
@@ -216,39 +206,32 @@ export default function ProductDetailPage() {
     ((PRODUCT.originalPrice - PRODUCT.price) / PRODUCT.originalPrice) * 100,
   );
 
-  const handleBuyNow = () => {
-    const colorName = PRODUCT.colors[selectedColor].name;
-    const total = PRODUCT.price * quantity;
-    const productUrl = `${window.location.origin}/products/${PRODUCT.id}`;
-    const message = `
-🛒 GLOWISON PURCHASE REQUEST
-━━━━━━━━━━━━━━━━━━━━━━
-
-🛍 Product Information
-Product Name : ${PRODUCT.name}
-Category : ${PRODUCT.category}
-Color : ${colorName}
-Size  : ${selectedSize}
-
-💰 Pricing Summary
-Unit Price   : ₹${PRODUCT.price.toLocaleString()}
-MRP          : ₹${PRODUCT.originalPrice.toLocaleString()}
-Quantity     : ${quantity}
-Total Amount : ₹${total.toLocaleString()}
-
-🔗 Product Link:
-${productUrl}
-
-Please confirm availability and share payment details.
-
-Thank you. 😊
-━━━━━━━━━━━━━━━━━━━━━━
-`;
-    window.open(
-      `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(message)}`,
-      "_blank",
-    );
-  };
+  // Build WhatsApp message
+  const buyNowMessage = [
+    `🛒 GLOWISON PURCHASE REQUEST`,
+    `━━━━━━━━━━━━━━━━━━━━━━`,
+    ``,
+    `🛍 Product Information`,
+    `Product Name : ${PRODUCT.name}`,
+    `Category     : ${PRODUCT.category}`,
+    `Color        : ${PRODUCT.colors[selectedColor].name}`,
+    `Size         : ${selectedSize}`,
+    ``,
+    `💰 Pricing Summary`,
+    `Unit Price   : ₹${PRODUCT.price.toLocaleString()}`,
+    `MRP          : ₹${PRODUCT.originalPrice.toLocaleString()}`,
+    `Quantity     : ${quantity}`,
+    `Total Amount : ₹${(PRODUCT.price * quantity).toLocaleString()}`,
+    ``,
+    `🔗 Product Link:`,
+    typeof window !== "undefined"
+      ? `${window.location.origin}/products/${PRODUCT.id}`
+      : "",
+    ``,
+    `Please confirm availability and share payment details.`,
+    `Thank you! 😊`,
+    `━━━━━━━━━━━━━━━━━━━━━━`,
+  ].join("\n");
 
   return (
     <>
@@ -262,41 +245,35 @@ Thank you. 😊
         .scrollbar-hide { -ms-overflow-style: none; scrollbar-width: none; }
       `}</style>
 
-      <div className="min-h-screen bg-[var(--color-bg-main)]">
+      <div className="min-h-screen bg-bg-main">
         <div className="max-w-7xl mx-auto px-4 md:px-6 py-6">
           {/* Breadcrumb */}
           <nav className="flex items-center gap-1.5 text-[13px] mb-6 flex-wrap">
             <Link
               href="/"
-              className="text-[var(--color-text-secondary)] hover:text-[var(--color-blue)] transition-colors"
+              className="text-text-secondary hover:text-blue transition-colors"
             >
               Home
             </Link>
-            <ChevronRight
-              size={12}
-              className="text-[var(--color-text-secondary)]"
-            />
+            <ChevronRight size={12} className="text-text-secondary" />
             <Link
               href="/products"
-              className="text-[var(--color-text-secondary)] hover:text-[var(--color-blue)] transition-colors"
+              className="text-text-secondary hover:text-blue transition-colors"
             >
               All Products
             </Link>
-            <ChevronRight
-              size={12}
-              className="text-[var(--color-text-secondary)]"
-            />
-            <span className="text-[var(--color-text-primary)] font-medium">
+            <ChevronRight size={12} className="text-text-secondary" />
+            <span className="text-text-primary font-medium">
               {PRODUCT.name}
             </span>
           </nav>
 
           {/* Main grid */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8 lg:gap-12 mb-10">
-            {/* LEFT — Images */}
+            {/* LEFT */}
             <div className="flex flex-col gap-3">
               <div
-                className="relative rounded-2xl overflow-hidden bg-[var(--color-white)] border border-[var(--color-border)] shadow-[var(--shadow-soft)]"
+                className="relative rounded-2xl overflow-hidden bg-white border border-border shadow-soft"
                 style={{ aspectRatio: "4/3" }}
               >
                 <img
@@ -305,17 +282,16 @@ Thank you. 😊
                   alt={PRODUCT.name}
                   className="w-full h-full object-cover img-fade"
                 />
+                <div className="absolute top-3 left-3 bg-gold text-blue-dark text-[10px] font-bold px-2.5 py-1 rounded-full z-10">
+                  -{discount}% OFF
+                </div>
               </div>
 
               {/* Thumbnails */}
               <div className="relative flex items-center gap-2">
                 <button
                   onClick={goPrev}
-                  className={`shrink-0 w-9 h-16 rounded-r-2xl flex items-center justify-center shadow-md transition-all duration-300 hover:cursor-pointer ${
-                    activeBtn === "left"
-                      ? "bg-[var(--color-blue)] text-white"
-                      : "bg-white text-[var(--color-blue-dark)] hover:bg-[var(--color-blue)] hover:text-white"
-                  }`}
+                  className={`shrink-0 w-9 h-16 rounded-r-2xl flex items-center justify-center shadow-md transition-all duration-300 cursor-pointer ${activeBtn === "left" ? "bg-gold text-white" : "bg-white text-blue-dark hover:bg-gold hover:text-white"}`}
                 >
                   <ChevronLeft size={16} />
                 </button>
@@ -324,11 +300,7 @@ Thank you. 😊
                     <button
                       key={i}
                       onClick={() => setActiveImage(i)}
-                      className={`rounded-xl overflow-hidden border-2 transition-all duration-200 shrink-0 w-16 h-16 ${
-                        activeImage === i
-                          ? "border-[var(--color-blue)] shadow-md scale-105"
-                          : "border-[var(--color-border)] hover:border-[var(--color-blue)] opacity-70 hover:opacity-100"
-                      }`}
+                      className={`rounded-xl overflow-hidden border-2 transition-all duration-200 shrink-0 w-16 h-16 ${activeImage === i ? "border-blue shadow-md scale-105" : "border-border hover:border-blue opacity-70 hover:opacity-100"}`}
                     >
                       <img
                         src={img}
@@ -340,85 +312,76 @@ Thank you. 😊
                 </div>
                 <button
                   onClick={goNext}
-                  className={`shrink-0 w-9 h-16 rounded-l-2xl flex items-center justify-center shadow-md transition-all duration-300 hover:cursor-pointer ${
-                    activeBtn === "right"
-                      ? "bg-[var(--color-blue)] text-white"
-                      : "bg-white text-[var(--color-blue-dark)] hover:bg-[var(--color-blue)] hover:text-white"
-                  }`}
+                  className={`shrink-0 w-9 h-16 rounded-l-2xl flex items-center justify-center shadow-md transition-all duration-300 cursor-pointer ${activeBtn === "right" ? "bg-gold text-white" : "bg-white text-blue-dark hover:bg-gold hover:text-white"}`}
                 >
                   <ChevronRight size={16} />
                 </button>
               </div>
             </div>
 
-            {/* RIGHT — Content */}
+            {/* RIGHT */}
             <div className="flex flex-col gap-3 pt-5">
               <StarRow rating={PRODUCT.rating} reviews={PRODUCT.reviews} />
-              <h1 className="pdp-heading text-3xl lg:text-3xl font-bold text-[var(--color-blue-dark)] leading-snug">
+
+              <h1 className="pdp-heading text-3xl font-bold text-blue-dark leading-snug">
                 {PRODUCT.name}
               </h1>
 
-              <div className="grid grid-cols-2 gap-x-6 gap-y-2 text-[13px] mt-2">
+              {/* ID / Availability / Brand / Category */}
+              <div className="grid grid-cols-2 gap-x-6 gap-y-2 text-[13px] mt-1">
                 <div>
-                  <span className="text-[var(--color-text-secondary)]">
-                    ID:{" "}
-                  </span>
-                  <span className="font-semibold text-[var(--color-text-primary)]">
+                  <span className="text-text-secondary">ID: </span>
+                  <span className="font-semibold text-text-primary">
                     GLW-{PRODUCT.id.toString().padStart(5, "0")}
                   </span>
                 </div>
                 <div>
-                  <span className="text-[var(--color-text-secondary)]">
-                    Availability:{" "}
-                  </span>
+                  <span className="text-text-secondary">Availability: </span>
                   <span className="font-semibold text-green-600">In Stock</span>
                 </div>
                 <div>
-                  <span className="text-[var(--color-text-secondary)]">
-                    Brand:{" "}
-                  </span>
-                  <span className="font-semibold text-[var(--color-blue)]">
-                    Glowison
-                  </span>
+                  <span className="text-text-secondary">Brand: </span>
+                  <span className="font-semibold text-blue">Glowison</span>
                 </div>
                 <div>
-                  <span className="text-[var(--color-text-secondary)]">
-                    Category:{" "}
-                  </span>
-                  <span className="font-semibold text-[var(--color-text-primary)]">
+                  <span className="text-text-secondary">Category: </span>
+                  <span className="font-semibold text-text-primary">
                     {PRODUCT.category}
                   </span>
                 </div>
               </div>
 
-              <div className="flex items-center gap-3 mt-2">
-                <span className="text-3xl font-bold text-[var(--color-blue-dark)]">
+              {/* Price */}
+              <div className="flex items-center gap-3 mt-1">
+                <span className="text-3xl font-bold text-blue-dark">
                   ₹{PRODUCT.price.toLocaleString()}
                 </span>
-                <span className="text-[15px] text-[var(--color-text-secondary)] line-through">
+                <span className="text-[15px] text-text-secondary line-through">
                   ₹{PRODUCT.originalPrice.toLocaleString()}
                 </span>
-                <span className="text-[12px] font-bold bg-[var(--color-gold)] text-[var(--color-blue-dark)] px-2.5 py-1 rounded-lg">
+                <span className="text-[12px] font-bold bg-gold text-blue-dark px-2.5 py-1 rounded-lg">
                   {discount}% OFF
                 </span>
               </div>
 
-              <div className="h-px mt-1 mb-1 bg-[var(--color-border)]" />
+              <div className="h-px bg-border mt-1 mb-1" />
 
+              {/* Color + Size */}
               <div className="flex flex-col md:flex-row gap-4">
+                {/* Color */}
                 <div className="flex-1">
-                  <p className="text-[12px] font-semibold text-[var(--color-text-secondary)] uppercase tracking-wider mb-2">
+                  <p className="text-[12px] font-semibold text-text-secondary uppercase tracking-wider mb-2">
                     Color
                   </p>
-                  <div className="border border-[var(--color-border)] rounded-xl px-4 h-12 bg-[var(--color-white)] flex items-center justify-between">
+                  <div className="border border-border rounded-xl px-4 h-12 bg-white flex items-center justify-between">
                     <div className="flex items-center gap-2.5">
                       <span
-                        className="w-5 h-5 rounded-full border border-[var(--color-border)] shrink-0"
+                        className="w-5 h-5 rounded-full border border-border shrink-0"
                         style={{
                           background: PRODUCT.colors[selectedColor].hex,
                         }}
                       />
-                      <span className="text-[14px] font-medium text-[var(--color-text-primary)]">
+                      <span className="text-[14px] font-medium text-text-primary">
                         {PRODUCT.colors[selectedColor].name}
                       </span>
                     </div>
@@ -431,7 +394,7 @@ Thank you. 😊
                             const idx = ALL_IMAGES.indexOf(c.images[0]);
                             if (idx !== -1) setActiveImage(idx);
                           }}
-                          className="hover:cursor-pointer"
+                          className="cursor-pointer"
                           style={{
                             width: "18px",
                             height: "18px",
@@ -439,7 +402,7 @@ Thank you. 😊
                             background: c.hex,
                             border:
                               selectedColor === i
-                                ? "2px solid var(--color-blue)"
+                                ? "2px solid #475792"
                                 : "1px solid #ddd",
                             transform:
                               selectedColor === i ? "scale(1.1)" : "scale(1)",
@@ -451,13 +414,14 @@ Thank you. 😊
                   </div>
                 </div>
 
+                {/* Size */}
                 <div className="flex-1 relative" ref={sizeRef}>
-                  <p className="text-[12px] font-semibold text-[var(--color-text-secondary)] uppercase tracking-wider mb-2">
-                    Size in (inch)
+                  <p className="text-[12px] font-semibold text-text-secondary uppercase tracking-wider mb-2">
+                    Size (inch)
                   </p>
                   <button
                     onClick={() => setIsSizeOpen(!isSizeOpen)}
-                    className="w-full h-12 border border-[var(--color-border)] rounded-xl px-4 bg-[var(--color-white)] flex items-center justify-between text-[14px] font-medium text-[var(--color-text-primary)] hover:border-[var(--color-blue)] transition-all hover:cursor-pointer"
+                    className="w-full h-12 border border-border rounded-xl px-4 bg-white flex items-center justify-between text-[14px] font-medium text-text-primary hover:border-blue transition-all cursor-pointer"
                   >
                     <span>{selectedSize}</span>
                     <ChevronDown
@@ -465,9 +429,8 @@ Thank you. 😊
                       className={`transition-transform duration-300 ${isSizeOpen ? "rotate-180" : ""}`}
                     />
                   </button>
-
                   {isSizeOpen && (
-                    <div className="absolute top-[calc(100%+6px)] left-0 right-0 z-50 bg-white border border-[var(--color-border)] rounded-xl shadow-xl overflow-hidden animate-in fade-in slide-in-from-top-2 duration-200">
+                    <div className="absolute top-[calc(100%+6px)] left-0 right-0 z-50 bg-white border border-border rounded-xl shadow-hover overflow-hidden">
                       {SIZES.map((size) => (
                         <button
                           key={size}
@@ -475,11 +438,7 @@ Thank you. 😊
                             setSelectedSize(size);
                             setIsSizeOpen(false);
                           }}
-                          className={`w-full text-left px-4 py-3 text-[14px] transition-colors flex items-center justify-between hover:cursor-pointer ${
-                            selectedSize === size
-                              ? "bg-[var(--color-blue-soft)] text-[var(--color-blue)] font-bold"
-                              : "text-[var(--color-text-primary)] hover:bg-gray-50"
-                          }`}
+                          className={`w-full text-left px-4 py-3 text-[14px] transition-colors flex items-center justify-between cursor-pointer ${selectedSize === size ? "bg-blue-soft text-blue font-bold" : "text-text-primary hover:bg-bg-main"}`}
                         >
                           {size}
                           {selectedSize === size && <Check size={14} />}
@@ -490,20 +449,21 @@ Thank you. 😊
                 </div>
               </div>
 
-              <div className="flex items-center gap-2 mt-2">
-                <div className="flex items-center border border-[var(--color-border)] rounded-xl overflow-hidden bg-[var(--color-white)] shrink-0">
+              {/* Qty + Wishlist + Add to Cart */}
+              <div className="flex items-center gap-2 mt-1">
+                <div className="flex items-center border border-border rounded-xl overflow-hidden bg-white shrink-0">
                   <button
                     onClick={() => setQuantity((q) => Math.max(1, q - 1))}
-                    className="w-9 h-10 flex items-center justify-center hover:cursor-pointer text-[var(--color-text-secondary)] hover:bg-[var(--color-blue-soft)]"
+                    className="w-9 h-10 flex items-center justify-center cursor-pointer text-text-secondary hover:bg-blue-soft hover:text-blue transition-colors"
                   >
                     <Minus size={13} />
                   </button>
-                  <span className="w-9 text-center font-bold text-[14px] text-[var(--color-text-primary)] border-x border-[var(--color-border)]">
+                  <span className="w-9 text-center font-bold text-[14px] text-text-primary border-x border-border">
                     {quantity}
                   </span>
                   <button
                     onClick={() => setQuantity((q) => q + 1)}
-                    className="w-9 h-10 flex items-center justify-center hover:cursor-pointer text-[var(--color-text-secondary)] hover:bg-[var(--color-blue-soft)]"
+                    className="w-9 h-10 flex items-center justify-center cursor-pointer text-text-secondary hover:bg-blue-soft hover:text-blue transition-colors"
                   >
                     <Plus size={13} />
                   </button>
@@ -511,62 +471,69 @@ Thank you. 😊
 
                 <button
                   onClick={handleWishlist}
-                  className={`relative w-10 h-10 rounded-xl border flex items-center justify-center hover:cursor-pointer transition-all duration-200 shrink-0 ${
-                    wishlisted
-                      ? "border-red-300 bg-red-50"
-                      : "border-[var(--color-border)] bg-[var(--color-white)]"
-                  }`}
+                  className={`relative w-10 h-10 rounded-xl border flex items-center justify-center cursor-pointer transition-all duration-200 shrink-0 ${wishlisted ? "border-red-300 bg-red-50" : "border-border bg-white hover:border-red-300 hover:bg-red-50"}`}
                 >
                   <WishlistSparkles active={sparkle} />
                   <Heart
                     size={16}
                     fill={wishlisted ? "#ef4444" : "transparent"}
-                    color={
-                      wishlisted ? "#ef4444" : "var(--color-text-secondary)"
-                    }
+                    color={wishlisted ? "#ef4444" : "#6B7280"}
                   />
                 </button>
 
                 <div className="flex-1">
-                  <AddToCartButton onClick={() => {}} />
+                  <AddToCartButton
+                    product={{
+                      ...PRODUCT,
+                      images: ALL_IMAGES,
+                      selectedColor: PRODUCT.colors[selectedColor].name,
+                      qty: quantity,
+                    }}
+                  />
                 </div>
               </div>
 
               {quantity > 1 && (
-                <p className="text-[12px] text-[var(--color-text-secondary)]">
+                <p className="text-[12px] text-text-secondary -mt-0.5">
                   Total:{" "}
-                  <span className="font-bold text-[var(--color-blue-dark)]">
+                  <span className="font-bold text-blue-dark">
                     ₹{(PRODUCT.price * quantity).toLocaleString()}
                   </span>
                 </p>
               )}
 
+              {/* Buy Now + Share */}
               <div className="flex items-center gap-2 mt-1">
-                <button
-                  onClick={handleBuyNow}
-                  className="flex-1 h-11 rounded-xl hover:cursor-pointer font-bold text-[13px] flex items-center justify-center gap-2 bg-[#25D366] text-white hover:bg-[#1ebe5a] transition-all"
-                >
-                  <svg
-                    viewBox="0 0 24 24"
-                    width="16"
-                    height="16"
-                    fill="currentColor"
-                  >
-                    <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z" />
-                    <path d="M12 0C5.373 0 0 5.373 0 12c0 2.127.559 4.126 1.533 5.856L.054 23.447a.75.75 0 00.916.943l5.724-1.498A11.95 11.95 0 0012 24c6.627 0 12-5.373 12-12S18.627 0 12 0zm0 22c-1.925 0-3.733-.52-5.284-1.428l-.379-.223-3.397.889.906-3.309-.247-.394A9.953 9.953 0 012 12C2 6.477 6.477 2 12 2s10 4.477 10 10-4.477 10-10 10z" />
-                  </svg>
-                  Buy Now
-                </button>
+                <div className="flex-1">
+                  <BuyNowButton
+                    mode="direct"
+                    label="Buy Now"
+                    product={{
+                      id: PRODUCT.id,
+                      name: PRODUCT.name,
+                      category: PRODUCT.category,
+                      price: PRODUCT.price,
+                      originalPrice: PRODUCT.originalPrice,
+                      images: ALL_IMAGES,
+                      badge: PRODUCT.badge || null,
+                      rating: PRODUCT.rating || null,
+                      reviews: PRODUCT.reviews || null,
+                      selectedColor: PRODUCT.colors[selectedColor].name,
+                      qty: quantity,
+                    }}
+                  />
+                </div>
                 <button
                   onClick={handleShare}
-                  className="h-11 px-4 rounded-xl border hover:cursor-pointer border-[var(--color-border)] bg-[var(--color-white)] flex items-center gap-2 text-[13px] font-semibold text-[var(--color-text-secondary)] hover:border-[var(--color-blue)] transition-all shrink-0"
+                  className="h-11 px-4 rounded-xl border border-border bg-white flex items-center gap-2 text-[13px] font-semibold text-text-secondary hover:border-blue hover:text-blue hover:bg-blue-soft transition-all duration-200 shrink-0 cursor-pointer"
                 >
                   <Share2 size={15} />
                   Share
                 </button>
               </div>
 
-              <div className="flex items-start gap-2 px-3 py-2 rounded-xl bg-[#f0fdf4] border border-[#bbf7d0] mt-1">
+              {/* WhatsApp note */}
+              <div className="flex items-start gap-2 px-3 py-2 rounded-xl bg-[#f0fdf4] border border-[#bbf7d0]">
                 <span className="text-[#16a34a] text-[13px] shrink-0 mt-0.5">
                   ✓
                 </span>
@@ -574,107 +541,85 @@ Thank you. 😊
                   Clicking <span className="font-bold">"Buy Now"</span> opens
                   WhatsApp with{" "}
                   <span className="font-bold">{selectedSize}</span> size details
-                  pre-filled.
+                  pre-filled. Just hit <span className="font-bold">Send</span>!
                 </p>
               </div>
             </div>
           </div>
 
-          {/* ── Description + Policies tabs section ── */}
-
-          <div className="bg-[var(--color-white)] rounded-2xl border border-[var(--color-border)] shadow-[var(--shadow-soft)] mb-12 overflow-hidden">
-            {/* Tab headers */}
-
-            <div className="flex border-b border-[var(--color-border)]">
+          {/* Tabs */}
+          <div className="bg-white rounded-2xl border border-border shadow-soft mb-12 overflow-hidden">
+            <div className="flex border-b border-border">
               {["description", "review"].map((tab) => (
                 <button
                   key={tab}
                   onClick={() => setActiveTab(tab)}
-                  className={`px-6 py-4 text-[13px] font-semibold uppercase tracking-wider transition-all duration-200 relative ${
-                    activeTab === tab
-                      ? "text-[var(--color-blue-dark)]"
-                      : "text-[var(--color-text-secondary)] hover:text-[var(--color-text-primary)]"
-                  }`}
+                  className={`px-6 py-4 text-[13px] font-semibold uppercase tracking-wider transition-all duration-200 relative cursor-pointer ${activeTab === tab ? "text-blue-dark" : "text-text-secondary hover:text-text-primary"}`}
                 >
                   {tab}
-
                   {activeTab === tab && (
-                    <span className="absolute bottom-0 left-0 right-0 h-0.5 bg-[var(--color-gold)]" />
+                    <span className="absolute bottom-0 left-0 right-0 h-0.5 bg-gold" />
                   )}
                 </button>
               ))}
             </div>
-
-            {/* Tab content */}
-
             <div className="p-6">
               {activeTab === "description" ? (
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
                   {/* Description */}
-
-                  <div className="md:col-span-1">
-                    <h3 className="font-bold text-[15px] text-[var(--color-text-primary)] mb-3">
+                  <div>
+                    <h3 className="font-bold text-[15px] text-text-primary mb-3">
                       Description
                     </h3>
-
-                    <p className="text-[13px] text-[var(--color-text-secondary)] leading-relaxed mb-3">
+                    <p className="text-[13px] text-text-secondary leading-relaxed mb-3">
                       {PRODUCT.description}
                     </p>
-
-                    <p className="text-[13px] text-[var(--color-text-secondary)] leading-relaxed">
+                    <p className="text-[13px] text-text-secondary leading-relaxed">
                       {PRODUCT.description2}
                     </p>
                   </div>
-
-                  {/* Features */}
-
-                  <div className="md:col-span-1">
-                    <h3 className="font-bold text-[15px] text-[var(--color-text-primary)] mb-3">
+                  {/* Features + Specs */}
+                  <div>
+                    <h3 className="font-bold text-[15px] text-text-primary mb-3">
                       Feature
                     </h3>
-
                     <ul className="flex flex-col gap-2">
                       {PRODUCT.features.map((f, i) => (
                         <li
                           key={i}
-                          className="flex items-start gap-2 text-[13px] text-[var(--color-text-secondary)]"
+                          className="flex items-start gap-2 text-[13px] text-text-secondary"
                         >
                           <Check
                             size={13}
-                            className="mt-0.5 shrink-0 text-[var(--color-gold)]"
+                            className="mt-0.5 shrink-0 text-gold"
                           />
                           {f}
                         </li>
                       ))}
                     </ul>
-
-                    <h3 className="font-bold text-[15px] text-[var(--color-text-primary)] mt-5 mb-3">
+                    <h3 className="font-bold text-[15px] text-text-primary mt-5 mb-3">
                       Specification
                     </h3>
-
                     <ul className="flex flex-col gap-2">
                       {PRODUCT.specifications.map((s, i) => (
                         <li
                           key={i}
-                          className="flex items-start gap-2 text-[13px] text-[var(--color-text-secondary)]"
+                          className="flex items-start gap-2 text-[13px] text-text-secondary"
                         >
                           <Check
                             size={13}
-                            className="mt-0.5 shrink-0 text-[var(--color-blue)]"
+                            className="mt-0.5 shrink-0 text-blue"
                           />
                           {s}
                         </li>
                       ))}
                     </ul>
                   </div>
-
-                  {/* Shipping / Policies */}
-
-                  <div className="md:col-span-1">
-                    <h3 className="font-bold text-[15px] text-[var(--color-text-primary)] mb-3">
+                  {/* Shipping */}
+                  <div>
+                    <h3 className="font-bold text-[15px] text-text-primary mb-3">
                       Shipping Information
                     </h3>
-
                     <div className="flex flex-col gap-3">
                       {[
                         {
@@ -682,25 +627,21 @@ Thank you. 😊
                           label: "Standard Delivery",
                           value: "5–7 business days, Free",
                         },
-
                         {
                           icon: Package,
                           label: "Express Delivery",
                           value: "2–3 business days, ₹99",
                         },
-
                         {
                           icon: RefreshCw,
                           label: "Easy Returns",
                           value: "7-day hassle-free return",
                         },
-
                         {
                           icon: ShieldCheck,
                           label: "Warranty",
                           value: "1 Year manufacturing warranty",
                         },
-
                         {
                           icon: Headphones,
                           label: "Customer Support",
@@ -708,19 +649,14 @@ Thank you. 😊
                         },
                       ].map(({ icon: Icon, label, value }) => (
                         <div key={label} className="flex items-start gap-3">
-                          <div className="w-8 h-8 rounded-lg bg-[var(--color-blue-soft)] flex items-center justify-center shrink-0">
-                            <Icon
-                              size={15}
-                              className="text-[var(--color-blue)]"
-                            />
+                          <div className="w-8 h-8 rounded-lg bg-blue-soft flex items-center justify-center shrink-0">
+                            <Icon size={15} className="text-blue" />
                           </div>
-
                           <div>
-                            <p className="text-[12px] font-semibold text-[var(--color-text-primary)]">
+                            <p className="text-[12px] font-semibold text-text-primary">
                               {label}
                             </p>
-
-                            <p className="text-[12px] text-[var(--color-text-secondary)]">
+                            <p className="text-[12px] text-text-secondary">
                               {value}
                             </p>
                           </div>
@@ -730,11 +666,9 @@ Thank you. 😊
                   </div>
                 </div>
               ) : (
-                <div className="text-center py-10 text-[var(--color-text-secondary)]">
+                <div className="text-center py-10 text-text-secondary">
                   <Star size={32} className="mx-auto mb-3 opacity-30" />
-
                   <p className="font-semibold text-[15px]">No reviews yet</p>
-
                   <p className="text-[13px] mt-1">
                     Be the first to review this product.
                   </p>
@@ -744,41 +678,36 @@ Thank you. 😊
           </div>
 
           {/* Similar Products */}
-
           <div>
             <div className="flex items-center justify-between mb-5">
-              <h2 className="pdp-heading text-xl font-bold text-[var(--color-blue-dark)]">
+              <h2 className="pdp-heading text-xl font-bold text-blue-dark">
                 Similar Product
               </h2>
-
               <Link
                 href="/products"
-                className="flex items-center gap-1.5 text-[13px] font-semibold text-[var(--color-text-primary)] border border-[var(--color-border)] px-4 py-2 rounded-full hover:border-[var(--color-blue)] hover:text-[var(--color-blue)] transition-all duration-200"
+                className="flex items-center gap-1.5 text-[13px] font-semibold text-text-primary border border-border px-4 py-2 rounded-full hover:border-blue hover:text-blue transition-all duration-200"
               >
                 VIEW MORE <ChevronRight size={14} />
               </Link>
             </div>
-
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
               {SIMILAR.map((p) => {
                 const bs = BADGE_STYLES[p.badge] || {
                   bg: "#475792",
                   color: "#fff",
                 };
-
                 return (
                   <Link
                     key={p.id}
                     href={`/products/${p.id}`}
-                    className="bg-[var(--color-white)] rounded-2xl overflow-hidden border border-[var(--color-border)] shadow-[var(--shadow-soft)] hover:shadow-[var(--shadow-hover)] transition-all duration-300 hover:-translate-y-1 group"
+                    className="bg-white rounded-2xl overflow-hidden border border-border shadow-soft hover:shadow-hover transition-all duration-300 hover:-translate-y-1 group"
                   >
-                    <div className="relative aspect-square overflow-hidden bg-[var(--color-bg-main)]">
+                    <div className="relative aspect-square overflow-hidden bg-bg-main">
                       <img
                         src={p.images[0]}
                         alt={p.name}
                         className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
                       />
-
                       {p.badge && (
                         <div
                           className="absolute top-2 left-2 text-[10px] font-bold uppercase px-2.5 py-1 rounded-full"
@@ -788,22 +717,18 @@ Thank you. 😊
                         </div>
                       )}
                     </div>
-
                     <div className="p-3">
-                      <p className="text-[10px] font-bold uppercase tracking-wider text-[var(--color-blue)] mb-1">
+                      <p className="text-[10px] font-bold uppercase tracking-wider text-blue mb-1">
                         {p.category}
                       </p>
-
-                      <h3 className="text-[13px] font-semibold text-[var(--color-text-primary)] leading-snug mb-2 line-clamp-2">
+                      <h3 className="text-[13px] font-semibold text-text-primary leading-snug mb-2 line-clamp-2">
                         {p.name}
                       </h3>
-
                       <div className="flex items-center gap-2">
-                        <span className="text-[15px] font-bold text-[var(--color-blue-dark)]">
+                        <span className="text-[15px] font-bold text-blue-dark">
                           ₹{p.price.toLocaleString()}
                         </span>
-
-                        <span className="text-[11px] text-[var(--color-text-secondary)] line-through">
+                        <span className="text-[11px] text-text-secondary line-through">
                           ₹{p.originalPrice.toLocaleString()}
                         </span>
                       </div>

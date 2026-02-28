@@ -244,7 +244,7 @@ function ProductCard({ product }) {
         </div>
 
         <div style={{ marginTop: "auto" }}>
-          <AddToCartButton onClick={handleCart} />
+          <AddToCartButton product={product} />
         </div>
       </div>
     </div>

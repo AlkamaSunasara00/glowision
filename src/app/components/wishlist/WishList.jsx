@@ -341,7 +341,7 @@ export default function WishlistPage() {
               {/* Continue shopping CTA */}
               <div className="flex justify-center mt-6">
                 <Link href="/products">
-                  <button className="inline-flex items-center gap-2 px-9 py-3.5 rounded-full bg-[var(--color-blue-dark)] text-white font-['DM_Sans'] font-bold text-[14px] border-none cursor-pointer shadow-[0_6px_20px_rgba(0,0,0,0.08)] hover:-translate-y-0.5 hover:shadow-[0_10px_30px_rgba(0,0,0,0.12)] transition-all duration-300">
+                  <button className="inline-flex items-center gap-2 px-9 py-3.5 rounded-full bg-blue-dark text-white font-['DM_Sans'] font-bold text-[14px] border-none cursor-pointer shadow-[0_6px_20px_rgba(0,0,0,0.08)] hover:-translate-y-0.5 hover:shadow-[0_10px_30px_rgba(0,0,0,0.12)] transition-all duration-300">
                     Continue Shopping <ChevronRight size={16} />
                   </button>
                 </Link>
