@@ -1,8 +1,12 @@
+// FILE: src/app/ui/cards/ProductCard.jsx
+// Handles: routing, wishlist state, hover state
+// Passes raw product (new data shape) directly to ProductCardUI
+
 "use client";
 
 import { useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
-import ProductCardUI from "./ProductCardUI";
+import { useRouter }           from "next/navigation";
+import ProductCardUI           from "./ProductCardUI";
 
 export default function ProductCard({ product }) {
   const router = useRouter();
@@ -10,38 +14,47 @@ export default function ProductCard({ product }) {
   const [wishlisted, setWishlisted] = useState(false);
   const [particles,  setParticles]  = useState(false);
 
-  // ── Sync wishlist state on mount ──
+  // ── Sync wishlist on mount ────────────────────────────────────────────────
   useEffect(() => {
     const saved = JSON.parse(localStorage.getItem("glowison_wishlist") || "[]");
     setWishlisted(saved.some((i) => i.id === product.id));
   }, [product.id]);
 
-  // ── Slug-based routing ──
+  // ── Navigate to /{category}/{slug} ────────────────────────────────────────
   const handleCardClick = () => {
-    router.push(`/${product.categorySlug}/${product.slug}`);
+    router.push(`/${product.category}/${product.slug}`);
   };
 
-  // ── Wishlist toggle ──
+  // ── Wishlist toggle ───────────────────────────────────────────────────────
   const handleWishlist = (e) => {
     e.preventDefault();
     e.stopPropagation();
-    const saved = JSON.parse(localStorage.getItem("glowison_wishlist") || "[]");
+
+    const saved    = JSON.parse(localStorage.getItem("glowison_wishlist") || "[]");
+    const allImages = product.images.flatMap((e) => e.images);
+    const mrp       = product.dimensions[0]?.mrp || 0;
+    const price     = Math.round(mrp * (1 - product.discount / 100));
+
     if (!wishlisted) {
       setParticles(true);
       setTimeout(() => setParticles(false), 700);
       localStorage.setItem("glowison_wishlist", JSON.stringify([...saved, {
-        id:           product.id,
-        name:         product.name,
-        price:        product.price,
-        originalPrice: product.originalPrice,
-        image:        product.images[0],
-        category:     product.category,
-        slug:         product.slug,
-        categorySlug: product.categorySlug,
+        id:            product.id,
+        name:          product.title,
+        price,
+        originalPrice: mrp,
+        images:        allImages,
+        category:      product.category,
+        slug:          product.slug,
+        rating:        product.rating,
+        reviews:       product.reviews,
+        badge:         product.badge || null,
       }]));
       setWishlisted(true);
     } else {
-      localStorage.setItem("glowison_wishlist", JSON.stringify(saved.filter((i) => i.id !== product.id)));
+      localStorage.setItem("glowison_wishlist",
+        JSON.stringify(saved.filter((i) => i.id !== product.id))
+      );
       setWishlisted(false);
     }
     window.dispatchEvent(new Event("wishlistUpdate"));

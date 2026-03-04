@@ -92,7 +92,7 @@ export default function Footer() {
             ]} />
 
             <div>
-              <p className="text-[10px] font-bold text-[var(--color-gold)] uppercase tracking-[1.5px] mb-5">Contact</p>
+              <p className="text-[15px] font-bold text-[var(--color-gold)] uppercase tracking-[1.5px] mb-5">Contact</p>
               <div className="space-y-3.5">
                 {[
                   { icon: Phone,  text: "+91 99787 50622",       color: "#16a34a" },
@@ -105,7 +105,7 @@ export default function Footer() {
                     >
                       <Icon size={13} style={{ color }} />
                     </div>
-                    <span className="text-[13px] text-white/60 group-hover:text-white/90 transition-colors duration-150 font-medium">
+                    <span className="text-[14px] text-white/60 group-hover:text-white/90 transition-colors duration-150 font-medium">
                       {text}
                     </span>
                   </div>
@@ -281,14 +281,14 @@ export default function Footer() {
 function DesktopCol({ title, links }) {
   return (
     <div>
-      <p className="text-[10px] font-bold text-[var(--color-gold)] uppercase tracking-[1.5px] mb-5">{title}</p>
+      <p className="text-[15px] font-bold text-[var(--color-gold)] uppercase tracking-[1.5px] mb-5">{title}</p>
       <div className="space-y-3">
         {links.map(({ label, href }) => (
           <a key={label} href={href}
-            className="flex items-center gap-2 text-[13px] text-white/55 hover:text-white/90 transition-colors duration-150 font-medium group w-fit"
+            className="flex items-center gap-2 text-[14px] text-white/55 hover:text-white/90 transition-colors duration-150 font-medium group w-fit"
           >
             <span className="w-0 overflow-hidden group-hover:w-3 transition-all duration-150 opacity-0 group-hover:opacity-100">
-              <ArrowRight size={11} className="text-[var(--color-gold)]" />
+              <ArrowRight size={13} className="text-[var(--color-gold)]" />
             </span>
             {label}
           </a>

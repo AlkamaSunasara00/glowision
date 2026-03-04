@@ -1,3 +1,5 @@
+// FILE: src/app/components/CartPage.jsx
+
 "use client";
 
 import { useState, useEffect } from "react";
@@ -5,6 +7,7 @@ import { Trash, ChevronRight, Star, Plus, Minus, Tag, ShoppingCart } from "lucid
 import Link from "next/link";
 import BuyNowButton from "@/app/ui/buttons/BuyNowButton";
 
+// ─── Star Rating ──────────────────────────────────────────────────────────────
 function StarRating({ rating }) {
   return (
     <div className="flex items-center gap-0.5">
@@ -18,6 +21,7 @@ function StarRating({ rating }) {
   );
 }
 
+// ─── Badge styles ─────────────────────────────────────────────────────────────
 const BADGE_STYLES = {
   "Best Seller": { bg: "#1a2e6e", color: "#fff" },
   New:           { bg: "#16a34a", color: "#fff" },
@@ -27,6 +31,15 @@ const BADGE_STYLES = {
   Popular:       { bg: "#0369a1", color: "#fff" },
 };
 
+// ─── Build product URL from cart item ─────────────────────────────────────────
+// Cart items are saved with: { category, slug }
+// URL format: /{category}/{slug}  e.g. /islamic-wall-art/ayatul-kursi-premium-frame
+function productUrl(item) {
+  if (item.category && item.slug) return `/${item.category}/${item.slug}`;
+  return "/products"; // fallback for old saved items
+}
+
+// ─── Cart Item ────────────────────────────────────────────────────────────────
 function CartItem({ item, onRemove, onQtyChange, selected, onSelect }) {
   const [removing, setRemoving] = useState(false);
 
@@ -35,17 +48,17 @@ function CartItem({ item, onRemove, onQtyChange, selected, onSelect }) {
     setTimeout(() => onRemove(item.id), 380);
   };
 
-  const discount = item.originalPrice > item.price
+  const discount   = item.originalPrice > item.price
     ? Math.round(((item.originalPrice - item.price) / item.originalPrice) * 100)
     : 0;
-
   const badgeStyle = BADGE_STYLES[item.badge] || { bg: "#475792", color: "#fff" };
+  const url        = productUrl(item);
 
   return (
     <div
       className="group bg-white hover:bg-bg-main border border-border rounded-2xl shadow-soft hover:shadow-hover transition-all duration-300 p-4"
       style={{
-        opacity: removing ? 0 : 1,
+        opacity:   removing ? 0 : 1,
         transform: removing ? "scale(0.96) translateX(-16px)" : "scale(1) translateX(0)",
         transition: removing
           ? "opacity 0.38s ease, transform 0.38s ease"
@@ -53,6 +66,7 @@ function CartItem({ item, onRemove, onQtyChange, selected, onSelect }) {
       }}
     >
       <div className="flex items-start gap-3">
+
         {/* Checkbox */}
         <button onClick={() => onSelect(item.id)}
           className="w-5 h-5 mt-1 rounded-md border-2 flex items-center justify-center shrink-0 transition-all duration-200 cursor-pointer"
@@ -66,7 +80,7 @@ function CartItem({ item, onRemove, onQtyChange, selected, onSelect }) {
         </button>
 
         {/* Image */}
-        <Link href={`/products/${item.id}`} className="shrink-0 block">
+        <Link href={url} className="shrink-0 block">
           <div className="w-[100px] h-[100px] md:w-[110px] md:h-[110px] rounded-xl overflow-hidden bg-bg-main relative shadow-sm">
             <img src={item.images?.[0] || item.image} alt={item.name}
               className="w-full h-full object-cover absolute inset-0 opacity-100 group-hover:opacity-0 scale-100 group-hover:scale-105 transition-all duration-500"
@@ -90,8 +104,10 @@ function CartItem({ item, onRemove, onQtyChange, selected, onSelect }) {
         <div className="flex-1 min-w-0">
           <div className="flex items-start justify-between gap-2">
             <div className="min-w-0">
-              <p className="text-[11px] font-semibold text-blue uppercase tracking-[0.7px] mb-0.5 leading-tight">{item.category}</p>
-              <Link href={`/products/${item.id}`}>
+              <p className="text-[11px] font-semibold text-blue uppercase tracking-[0.7px] mb-0.5 leading-tight capitalize">
+                {(item.category || "").replace(/-/g, " ")}
+              </p>
+              <Link href={url}>
                 <h3
                   className="font-semibold text-text-primary group-hover:text-blue leading-snug mb-1.5 transition-colors duration-200 line-clamp-2"
                   style={{ fontFamily: "'Playfair Display', serif", fontSize: "clamp(14px,1.6vw,17px)" }}
@@ -119,7 +135,7 @@ function CartItem({ item, onRemove, onQtyChange, selected, onSelect }) {
             </p>
           )}
 
-          <div className="flex items-center gap-2 flex-wrap mb-0 md:mb-0">
+          <div className="flex items-center gap-2 flex-wrap">
             <span className="text-[17px] font-bold text-blue-dark">₹{item.price.toLocaleString()}</span>
             {item.originalPrice > item.price && (
               <span className="text-[13px] text-text-secondary line-through">₹{item.originalPrice.toLocaleString()}</span>
@@ -153,14 +169,14 @@ function CartItem({ item, onRemove, onQtyChange, selected, onSelect }) {
   );
 }
 
-// ── Main Page ─────────────────────────────────────────────────────────────────
+// ─── Main Page ────────────────────────────────────────────────────────────────
 export default function CartPage() {
-  const [cart, setCart]                   = useState([]);
-  const [selected, setSelected]           = useState([]);
-  const [loading, setLoading]             = useState(true);
-  const [coupon, setCoupon]               = useState("");
+  const [cart,          setCart]          = useState([]);
+  const [selected,      setSelected]      = useState([]);
+  const [loading,       setLoading]       = useState(true);
+  const [coupon,        setCoupon]        = useState("");
   const [appliedCoupon, setAppliedCoupon] = useState(null);
-  const [couponError, setCouponError]     = useState("");
+  const [couponError,   setCouponError]   = useState("");
 
   const COUPONS = { SAVE10: 10, GLOWISON20: 20, FIRST15: 15 };
 
@@ -172,41 +188,28 @@ export default function CartPage() {
     setLoading(false);
   }, []);
 
-  // 🆕 Single saveCart that ALWAYS fires cartUpdate — covers remove, qty, bulk delete
   const saveCart = (updated) => {
     setCart(updated);
     localStorage.setItem("glowison_cart", JSON.stringify(updated));
-    window.dispatchEvent(new Event("cartUpdate")); // 🆕 badge syncs instantly
+    window.dispatchEvent(new Event("cartUpdate"));
   };
 
-  const removeItem = (id) => {
-    saveCart(cart.filter((i) => i.id !== id));
-    setSelected((s) => s.filter((sid) => sid !== id));
-  };
+  const removeItem      = (id)       => { saveCart(cart.filter((i) => i.id !== id)); setSelected((s) => s.filter((sid) => sid !== id)); };
+  const updateQty       = (id, qty)  => saveCart(cart.map((i) => (i.id === id ? { ...i, qty } : i)));
+  const toggleSelect    = (id)       => setSelected((s) => s.includes(id) ? s.filter((sid) => sid !== id) : [...s, id]);
+  const toggleSelectAll = ()         => setSelected(selected.length === cart.length ? [] : cart.map((i) => i.id));
 
-  const updateQty = (id, qty) => saveCart(cart.map((i) => (i.id === id ? { ...i, qty } : i)));
-
-  const toggleSelect    = (id) => setSelected((s) => s.includes(id) ? s.filter((sid) => sid !== id) : [...s, id]);
-  const toggleSelectAll = ()   => setSelected(selected.length === cart.length ? [] : cart.map((i) => i.id));
-
-  // 🆕 Smooth animated bulk delete
   const deleteSelected = () => {
     if (!selected.length) return;
     if (!confirm(`Remove ${selected.length} item(s) from cart?`)) return;
-    const remaining = cart.filter((i) => !selected.includes(i.id));
-    saveCart(remaining); // fires cartUpdate automatically
+    saveCart(cart.filter((i) => !selected.includes(i.id)));
     setSelected([]);
   };
 
   const applyCoupon = () => {
     const code = coupon.trim().toUpperCase();
-    if (COUPONS[code]) {
-      setAppliedCoupon({ code, pct: COUPONS[code] });
-      setCouponError("");
-    } else {
-      setAppliedCoupon(null);
-      setCouponError("Invalid coupon code");
-    }
+    if (COUPONS[code]) { setAppliedCoupon({ code, pct: COUPONS[code] }); setCouponError(""); }
+    else               { setAppliedCoupon(null); setCouponError("Invalid coupon code"); }
   };
 
   const selectedItems = cart.filter((i) => selected.includes(i.id));
@@ -257,7 +260,7 @@ export default function CartPage() {
         <div className="max-w-7xl mx-auto px-4 md:px-6">
 
           {/* Breadcrumb */}
-          <nav className="flex items-center gap-1.5 text-[16px] mb-3 flex-wrap pb-6 border-b border-border ">
+          <nav className="flex items-center gap-1.5 text-[13px] mb-6 flex-wrap pb-4 border-b border-border">
             <Link href="/" className="text-text-secondary hover:text-blue transition-colors">Home</Link>
             <ChevronRight size={12} className="text-text-secondary" />
             <span className="text-text-primary font-medium">Cart</span>
@@ -287,7 +290,7 @@ export default function CartPage() {
           ) : (
             <div className="grid grid-cols-1 lg:grid-cols-[1fr_340px] gap-6 items-start">
 
-              {/* LEFT */}
+              {/* LEFT — Items */}
               <div className="flex flex-col gap-4">
                 {/* Select All / Delete bar */}
                 <div className="flex items-center justify-between bg-white border border-border rounded-2xl px-5 py-3 shadow-soft">
@@ -304,19 +307,16 @@ export default function CartPage() {
                       )}
                     </span>
                     Select All
-                    {/* 🆕 Show selected count when not all selected */}
                     {selected.length > 0 && selected.length < cart.length && (
                       <span className="text-[11px] font-bold text-white bg-blue px-2 py-0.5 rounded-full">
                         {selected.length}
                       </span>
                     )}
                   </button>
-
                   <button onClick={deleteSelected} disabled={!selected.length}
                     className="flex items-center gap-1.5 text-[13px] font-semibold px-4 py-1.5 rounded-full transition-all duration-200 disabled:opacity-40 disabled:cursor-not-allowed bg-red-50 border border-red-200 text-red-500 hover:bg-red-500 hover:text-white hover:border-red-500 cursor-pointer"
                   >
                     <Trash size={13} />
-                    {/* 🆕 Show count on delete button */}
                     Delete{selected.length > 0 ? ` (${selected.length})` : ""}
                   </button>
                 </div>
@@ -401,7 +401,6 @@ export default function CartPage() {
                 </div>
 
                 <BuyNowButton
-                  mode="cart"
                   message={cartMessage}
                   label="Buy Now via WhatsApp"
                   disabled={!selectedItems.length}
