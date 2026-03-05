@@ -1,10 +1,12 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
 import { ShoppingCart, Plus, Check } from "lucide-react";
 import "./atcButton.css";
 
 export default function AddToCartButton({ product, onClick, className = "", style = {} }) {
+  const router = useRouter();
   const [phase, setPhase] = useState("idle");
 
   useEffect(() => {
@@ -20,7 +22,7 @@ export default function AddToCartButton({ product, onClick, className = "", styl
     if (phase !== "idle") return;
 
     if (product) {
-      const cart = JSON.parse(localStorage.getItem("glowison_cart") || "[]");
+      const cart   = JSON.parse(localStorage.getItem("glowison_cart") || "[]");
       const exists = cart.some((i) => i.id === product.id);
       if (!exists) {
         const item = {
@@ -29,12 +31,13 @@ export default function AddToCartButton({ product, onClick, className = "", styl
           category:      product.category,
           price:         product.price,
           originalPrice: product.originalPrice,
-          images:        product.images || [],
-          badge:         product.badge        || null,
-          rating:        product.rating       || null,
-          reviews:       product.reviews      || null,
+          images:        product.images        || [],
+          badge:         product.badge         || null,
+          rating:        product.rating        || null,
+          reviews:       product.reviews       || null,
           selectedColor: product.selectedColor || null,
-          qty:           product.qty          || 1,
+          qty:           product.qty           || 1,
+          slug:          product.slug          || null,
         };
         localStorage.setItem("glowison_cart", JSON.stringify([...cart, item]));
         window.dispatchEvent(new Event("cartUpdate"));
@@ -42,8 +45,13 @@ export default function AddToCartButton({ product, onClick, className = "", styl
     }
 
     if (onClick) onClick(e);
+
+    // Show loading briefly then navigate to cart
     setPhase("loading");
-    setTimeout(() => setPhase("added"), 1000); // ⚡ reduced from 1500 → 1000
+    setTimeout(() => {
+      setPhase("added");
+      router.push("/cart-items");
+    }, 800);
   };
 
   return (

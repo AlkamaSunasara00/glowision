@@ -1,5 +1,4 @@
 // FILE: src/app/components/CartPage.jsx
-
 "use client";
 
 import { useState, useEffect } from "react";
@@ -7,7 +6,6 @@ import { Trash, ChevronRight, Star, Plus, Minus, Tag, ShoppingCart } from "lucid
 import Link from "next/link";
 import BuyNowButton from "@/app/ui/buttons/BuyNowButton";
 
-// ─── Star Rating ──────────────────────────────────────────────────────────────
 function StarRating({ rating }) {
   return (
     <div className="flex items-center gap-0.5">
@@ -21,7 +19,6 @@ function StarRating({ rating }) {
   );
 }
 
-// ─── Badge styles ─────────────────────────────────────────────────────────────
 const BADGE_STYLES = {
   "Best Seller": { bg: "#1a2e6e", color: "#fff" },
   New:           { bg: "#16a34a", color: "#fff" },
@@ -31,15 +28,11 @@ const BADGE_STYLES = {
   Popular:       { bg: "#0369a1", color: "#fff" },
 };
 
-// ─── Build product URL from cart item ─────────────────────────────────────────
-// Cart items are saved with: { category, slug }
-// URL format: /{category}/{slug}  e.g. /islamic-wall-art/ayatul-kursi-premium-frame
 function productUrl(item) {
   if (item.category && item.slug) return `/${item.category}/${item.slug}`;
-  return "/products"; // fallback for old saved items
+  return "/products";
 }
 
-// ─── Cart Item ────────────────────────────────────────────────────────────────
 function CartItem({ item, onRemove, onQtyChange, selected, onSelect }) {
   const [removing, setRemoving] = useState(false);
 
@@ -58,15 +51,14 @@ function CartItem({ item, onRemove, onQtyChange, selected, onSelect }) {
     <div
       className="group bg-white hover:bg-bg-main border border-border rounded-2xl shadow-soft hover:shadow-hover transition-all duration-300 p-4"
       style={{
-        opacity:   removing ? 0 : 1,
-        transform: removing ? "scale(0.96) translateX(-16px)" : "scale(1) translateX(0)",
+        opacity:    removing ? 0 : 1,
+        transform:  removing ? "scale(0.96) translateX(-16px)" : "scale(1) translateX(0)",
         transition: removing
           ? "opacity 0.38s ease, transform 0.38s ease"
           : "all 0.3s cubic-bezier(0.34, 1.2, 0.64, 1)",
       }}
     >
       <div className="flex items-start gap-3">
-
         {/* Checkbox */}
         <button onClick={() => onSelect(item.id)}
           className="w-5 h-5 mt-1 rounded-md border-2 flex items-center justify-center shrink-0 transition-all duration-200 cursor-pointer"
@@ -100,7 +92,7 @@ function CartItem({ item, onRemove, onQtyChange, selected, onSelect }) {
           </div>
         </Link>
 
-        {/* Info + delete */}
+        {/* Info */}
         <div className="flex-1 min-w-0">
           <div className="flex items-start justify-between gap-2">
             <div className="min-w-0">
@@ -149,18 +141,16 @@ function CartItem({ item, onRemove, onQtyChange, selected, onSelect }) {
         </div>
       </div>
 
-      {/* Qty counter */}
+      {/* Qty */}
       <div className="flex justify-end mt-3">
         <div className="flex items-center border border-border rounded-xl overflow-hidden bg-white">
           <button onClick={() => onQtyChange(item.id, Math.max(1, item.qty - 1))}
-            className="w-9 h-9 flex items-center justify-center cursor-pointer text-text-secondary hover:bg-blue-soft hover:text-blue transition-colors"
-          >
+            className="w-9 h-9 flex items-center justify-center cursor-pointer text-text-secondary hover:bg-blue-soft hover:text-blue transition-colors">
             <Minus size={13} />
           </button>
           <span className="w-10 text-center font-bold text-[14px] text-text-primary border-x border-border">{item.qty}</span>
           <button onClick={() => onQtyChange(item.id, item.qty + 1)}
-            className="w-9 h-9 flex items-center justify-center cursor-pointer text-text-secondary hover:bg-blue-soft hover:text-blue transition-colors"
-          >
+            className="w-9 h-9 flex items-center justify-center cursor-pointer text-text-secondary hover:bg-blue-soft hover:text-blue transition-colors">
             <Plus size={13} />
           </button>
         </div>
@@ -169,7 +159,52 @@ function CartItem({ item, onRemove, onQtyChange, selected, onSelect }) {
   );
 }
 
-// ─── Main Page ────────────────────────────────────────────────────────────────
+// ── Build full detailed WhatsApp message ──────────────────────────────────────
+function buildCartMessage(selectedItems, subtotal, discountAmt, appliedCoupon, delivery, total) {
+  const origin = typeof window !== "undefined" ? window.location.origin : "https://glowison.com";
+
+  const itemLines = selectedItems.flatMap((item, idx) => {
+    const itemTotal = item.price * item.qty;
+    return [
+      ``,
+      `📦 Item ${idx + 1}`,
+      `  Name       : ${item.name}`,
+      `  Category   : ${(item.category || "").replace(/-/g, " ")}`,
+      item.selectedColor ? `  Color      : ${item.selectedColor}` : null,
+      item.size          ? `  Size       : ${item.size}`          : null,
+      `  Unit Price : ₹${item.price.toLocaleString()}`,
+      `  MRP        : ₹${(item.originalPrice || item.price).toLocaleString()}`,
+      `  Quantity   : ${item.qty}`,
+      `  Item Total : ₹${itemTotal.toLocaleString()}`,
+      `  Product ID : GLW-${String(item.id).padStart(5, "0")}`,
+      (item.category && item.slug)
+        ? `  Link       : ${origin}/${item.category}/${item.slug}`
+        : null,
+    ].filter(Boolean);
+  });
+
+  return [
+    `🛒 *ORDER REQUEST — GLOWISON*`,
+    `━━━━━━━━━━━━━━━━━━━━━━━━━━`,
+    ...itemLines,
+    ``,
+    `━━━━━━━━━━━━━━━━━━━━━━━━━━`,
+    `💰 *Order Summary*`,
+    `  Items    : ${selectedItems.length}`,
+    `  Subtotal : ₹${subtotal.toLocaleString()}`,
+    appliedCoupon
+      ? `  Coupon   : ${appliedCoupon.code} (−${appliedCoupon.pct}% = −₹${discountAmt.toLocaleString()})`
+      : null,
+    `  Delivery : ${delivery === 0 ? "Free 🎉" : `₹${delivery}`}`,
+    `  *Total   : ₹${total.toLocaleString()}*`,
+    ``,
+    `Please confirm availability and share payment details.`,
+    `Thank you! 😊`,
+    `━━━━━━━━━━━━━━━━━━━━━━━━━━`,
+  ].filter(Boolean).join("\n");
+}
+
+// ── Main Page ─────────────────────────────────────────────────────────────────
 export default function CartPage() {
   const [cart,          setCart]          = useState([]);
   const [selected,      setSelected]      = useState([]);
@@ -188,16 +223,11 @@ export default function CartPage() {
     setLoading(false);
   }, []);
 
-  const saveCart = (updated) => {
-    setCart(updated);
-    localStorage.setItem("glowison_cart", JSON.stringify(updated));
-    window.dispatchEvent(new Event("cartUpdate"));
-  };
-
-  const removeItem      = (id)       => { saveCart(cart.filter((i) => i.id !== id)); setSelected((s) => s.filter((sid) => sid !== id)); };
-  const updateQty       = (id, qty)  => saveCart(cart.map((i) => (i.id === id ? { ...i, qty } : i)));
-  const toggleSelect    = (id)       => setSelected((s) => s.includes(id) ? s.filter((sid) => sid !== id) : [...s, id]);
-  const toggleSelectAll = ()         => setSelected(selected.length === cart.length ? [] : cart.map((i) => i.id));
+  const saveCart  = (updated) => { setCart(updated); localStorage.setItem("glowison_cart", JSON.stringify(updated)); window.dispatchEvent(new Event("cartUpdate")); };
+  const removeItem      = (id)      => { saveCart(cart.filter((i) => i.id !== id)); setSelected((s) => s.filter((sid) => sid !== id)); };
+  const updateQty       = (id, qty) => saveCart(cart.map((i) => (i.id === id ? { ...i, qty } : i)));
+  const toggleSelect    = (id)      => setSelected((s) => s.includes(id) ? s.filter((sid) => sid !== id) : [...s, id]);
+  const toggleSelectAll = ()        => setSelected(selected.length === cart.length ? [] : cart.map((i) => i.id));
 
   const deleteSelected = () => {
     if (!selected.length) return;
@@ -218,19 +248,9 @@ export default function CartPage() {
   const delivery      = subtotal > 999 ? 0 : 99;
   const total         = subtotal - discountAmt + delivery;
 
+  // Full detailed message — every field per item
   const cartMessage = selectedItems.length
-    ? [
-        `🛒 *Order Inquiry — Glowison*`, ``,
-        `*Items:*`,
-        ...selectedItems.map((i) => `• ${i.name} (x${i.qty}) — ₹${(i.price * i.qty).toLocaleString()}`),
-        ``,
-        appliedCoupon ? `*Coupon:* ${appliedCoupon.code} (-${appliedCoupon.pct}%)` : null,
-        `*Subtotal:* ₹${subtotal.toLocaleString()}`,
-        discountAmt ? `*Discount:* -₹${discountAmt.toLocaleString()}` : null,
-        `*Delivery:* ${delivery === 0 ? "Free" : `₹${delivery}`}`,
-        `*Total:* ₹${total.toLocaleString()}`, ``,
-        `Please confirm availability and share payment details. Thank you! 🙏`,
-      ].filter(Boolean).join("\n")
+    ? buildCartMessage(selectedItems, subtotal, discountAmt, appliedCoupon, delivery, total)
     : "";
 
   if (loading) return (
@@ -250,16 +270,12 @@ export default function CartPage() {
         .cart-item-row:nth-child(3) { animation-delay: 0.15s; }
         .cart-item-row:nth-child(4) { animation-delay: 0.20s; }
         .cart-item-row:nth-child(5) { animation-delay: 0.25s; }
-        @keyframes cartFadeUp {
-          from { opacity: 0; transform: translateY(16px); }
-          to   { opacity: 1; transform: translateY(0); }
-        }
+        @keyframes cartFadeUp { from { opacity:0; transform:translateY(16px); } to { opacity:1; transform:translateY(0); } }
       `}</style>
 
       <section className="bg-bg-main min-h-screen pt-6 pb-28">
         <div className="max-w-7xl mx-auto px-4 md:px-6">
 
-          {/* Breadcrumb */}
           <nav className="flex items-center gap-1.5 text-[13px] mb-6 flex-wrap pb-4 border-b border-border">
             <Link href="/" className="text-text-secondary hover:text-blue transition-colors">Home</Link>
             <ChevronRight size={12} className="text-text-secondary" />
@@ -292,7 +308,6 @@ export default function CartPage() {
 
               {/* LEFT — Items */}
               <div className="flex flex-col gap-4">
-                {/* Select All / Delete bar */}
                 <div className="flex items-center justify-between bg-white border border-border rounded-2xl px-5 py-3 shadow-soft">
                   <button onClick={toggleSelectAll}
                     className="flex items-center gap-3 text-[13px] font-semibold text-text-primary hover:text-blue transition-colors cursor-pointer"
@@ -308,9 +323,7 @@ export default function CartPage() {
                     </span>
                     Select All
                     {selected.length > 0 && selected.length < cart.length && (
-                      <span className="text-[11px] font-bold text-white bg-blue px-2 py-0.5 rounded-full">
-                        {selected.length}
-                      </span>
+                      <span className="text-[11px] font-bold text-white bg-blue px-2 py-0.5 rounded-full">{selected.length}</span>
                     )}
                   </button>
                   <button onClick={deleteSelected} disabled={!selected.length}
@@ -321,7 +334,6 @@ export default function CartPage() {
                   </button>
                 </div>
 
-                {/* Items */}
                 <div className="flex flex-col gap-3">
                   {cart.map((item) => (
                     <div key={item.id} className="cart-item-row">
@@ -357,17 +369,12 @@ export default function CartPage() {
                     />
                   </div>
                   <button onClick={applyCoupon}
-                    className="px-4 py-2.5 rounded-xl bg-blue-dark text-white text-[13px] font-bold hover:bg-blue transition-colors duration-200 shrink-0 cursor-pointer"
-                  >
+                    className="px-4 py-2.5 rounded-xl bg-blue-dark text-white text-[13px] font-bold hover:bg-blue transition-colors duration-200 shrink-0 cursor-pointer">
                     Apply
                   </button>
                 </div>
-                {couponError && <p className="text-[11px] text-red-500 mb-3 px-1">{couponError}</p>}
-                {appliedCoupon && (
-                  <p className="text-[11px] text-green-600 font-semibold mb-3 px-1">
-                    ✓ {appliedCoupon.code} applied — {appliedCoupon.pct}% off!
-                  </p>
-                )}
+                {couponError   && <p className="text-[11px] text-red-500 mb-3 px-1">{couponError}</p>}
+                {appliedCoupon && <p className="text-[11px] text-green-600 font-semibold mb-3 px-1">✓ {appliedCoupon.code} applied — {appliedCoupon.pct}% off!</p>}
 
                 <div className="h-px bg-border my-4" />
 
@@ -389,9 +396,7 @@ export default function CartPage() {
                       {delivery === 0 ? "Free" : `₹${delivery}`}
                     </span>
                   </div>
-                  {delivery > 0 && (
-                    <p className="text-[11px] text-text-secondary -mt-1">Free delivery on orders above ₹999</p>
-                  )}
+                  {delivery > 0 && <p className="text-[11px] text-text-secondary -mt-1">Free delivery on orders above ₹999</p>}
                 </div>
 
                 {/* Total */}
@@ -400,10 +405,14 @@ export default function CartPage() {
                   <span className="text-[20px] font-bold text-blue-dark">₹{total.toLocaleString()}</span>
                 </div>
 
+                {/* Buy Now — mode="cart" opens confirm-only sheet */}
                 <BuyNowButton
+                  mode="cart"
                   message={cartMessage}
                   label="Buy Now via WhatsApp"
                   disabled={!selectedItems.length}
+                  itemCount={selectedItems.length}
+                  total={total}
                   fullWidth
                 />
 

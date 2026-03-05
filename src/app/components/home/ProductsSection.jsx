@@ -294,7 +294,10 @@ export default function ProductsSection() {
     return () => window.removeEventListener("resize", update);
   }, []);
 
-  const visibleProducts = PRODUCTS.slice(0, visibleCount);
+  const featuredProducts = PRODUCTS.filter((product) => product.tags?.featured);
+  const sourceProducts =
+    featuredProducts.length > 0 ? featuredProducts : PRODUCTS;
+  const visibleProducts = sourceProducts.slice(0, visibleCount);
 
   return (
     <>
@@ -358,7 +361,7 @@ export default function ProductsSection() {
           </div>
 
           {/* Load More */}
-          {visibleCount < PRODUCTS.length && (
+          {visibleCount < sourceProducts.length && (
             <div style={{ display: "flex", justifyContent: "center", marginTop: "52px" }}>
               <button
                 onClick={() => setVisibleCount((prev) => prev + 4)}

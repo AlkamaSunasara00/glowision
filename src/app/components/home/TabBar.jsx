@@ -49,7 +49,7 @@ function buildSuggestions() {
         type:     "subcategory",
         label:    sub.name,
         subtitle: `in ${cat.name} · ${count} item${count !== 1 ? "s" : ""}`,
-        href:     `/products?category=${cat.slug}&sub=${sub.slug}`,
+        href:     `/${cat.slug}/sub/${sub.slug}`,
       });
     });
   });
@@ -78,7 +78,7 @@ const TRENDING_CHIPS = [
   ...CATEGORIES.flatMap((c) =>
     c.subcategories.slice(0, 1).map((s) => ({
       label: s.name,
-      href:  `/products?category=${c.slug}&sub=${s.slug}`,
+      href:  `/${c.slug}/sub/${s.slug}`,
     }))
   ),
 ].slice(0, 6);
@@ -204,9 +204,9 @@ function FullScreenSearch({ open, onClose }) {
 
   return (
     <div
-      className="md:hidden"
+      className="md:hidden "
       style={{
-        position: "fixed", inset: 0, zIndex: 9999,
+        position: "fixed", inset: 0, zIndex: 979,
         background: "#f8f9fc",
         transform: open ? "translateY(0)" : "translateY(100%)",
         opacity:   open ? 1 : 0,

@@ -23,10 +23,10 @@ export default function Footer() {
           {/* Brand */}
           <div className="col-span-4">
             <img
-              src="/logos/logo1.png"
+              src="/logos/logo2.png"
               alt="Glowison"
               className="h-12 w-auto object-contain mb-4"
-              style={{ filter: "drop-shadow(0 0 8px rgba(255,255,255,0.8)) drop-shadow(0 0 3px rgba(255,255,255,1))" }}
+              // style={{ filter: "drop-shadow(0 0 8px rgba(255,255,255,0.8)) drop-shadow(0 0 3px rgba(255,255,255,1))" }}
             />
             <p className="text-[13px] leading-relaxed text-white/60 max-w-[260px] mt-5">
               Premium Acrylic & Metal Wall Art crafted with precision, elegance, and modern Islamic aesthetics.
@@ -122,10 +122,9 @@ export default function Footer() {
         {/* Brand header */}
         <div className="px-5 pt-8 pb-6 border-b border-white/10">
           <img
-            src="/logos/logo1.png"
+            src="/logos/logo2.png"
             alt="Glowison"
             className="h-10 w-auto object-contain mb-3"
-            style={{ filter: "drop-shadow(0 0 8px rgba(255,255,255,0.8)) drop-shadow(0 0 3px rgba(255,255,255,1))" }}
           />
           <p className="text-[13px] text-white/50 leading-relaxed max-w-[280px] mt-5">
             Premium Islamic Wall Art crafted with precision and modern aesthetics.

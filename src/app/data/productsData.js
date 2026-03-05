@@ -375,7 +375,23 @@ images: [
 ],
 },
 {
-color: "black",
+color: "gold",
+hex: "#D4A843",
+images: [
+"/images/products/p1.png",
+"/images/products/p2.png",
+],
+},
+{
+color: "red",
+hex: "#E4A443",
+images: [
+"/images/products/p1.png",
+"/images/products/p2.png",
+],
+},
+{
+color: "green",
 hex: "#1F2937",
 images: [
 "/images/products/p3.png",

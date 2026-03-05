@@ -464,62 +464,64 @@
 //   );
 // }
 
-
-
-
-
-
-
-
-
-
-
 "use client";
 
 import { useState, useRef, useCallback, useEffect } from "react";
 import {
-  Star, ChevronDown, ChevronRight, ChevronLeft,
-  Heart, Check, Plus, Minus, Share2,
-  Truck, RefreshCw, ShieldCheck, Headphones, Package,
+  Star,
+  ChevronDown,
+  ChevronRight,
+  ChevronLeft,
+  Heart,
+  Check,
+  Plus,
+  Minus,
+  Share2,
+  Truck,
+  RefreshCw,
+  ShieldCheck,
+  Headphones,
+  Package,
 } from "lucide-react";
 import Link from "next/link";
 import { PRODUCTS } from "@/app/data/productsData";
 import AddToCartButton from "@/app/ui/buttons/AtcButton";
-import BuyNowButton    from "@/app/ui/buttons/BuyNowButton";
+import BuyNowButton from "@/app/ui/buttons/BuyNowButton";
 
-// ─────────────────────────────────────────────────────────────────────────────
-// BADGE STYLES
-// ─────────────────────────────────────────────────────────────────────────────
 const BADGE_STYLES = {
   "Best Seller": { bg: "#1a2e6e", color: "#fff" },
-  New:           { bg: "#16a34a", color: "#fff" },
-  Sale:          { bg: "#dc2626", color: "#fff" },
-  Premium:       { bg: "#92400e", color: "#fff" },
-  Limited:       { bg: "#7c3aed", color: "#fff" },
-  Popular:       { bg: "#0369a1", color: "#fff" },
+  New: { bg: "#16a34a", color: "#fff" },
+  Sale: { bg: "#dc2626", color: "#fff" },
+  Premium: { bg: "#92400e", color: "#fff" },
+  Limited: { bg: "#7c3aed", color: "#fff" },
+  Popular: { bg: "#0369a1", color: "#fff" },
 };
 
-// ─────────────────────────────────────────────────────────────────────────────
-// WISHLIST SPARKLES
-// ─────────────────────────────────────────────────────────────────────────────
 function WishlistSparkles({ active }) {
   if (!active) return null;
   return (
     <span className="pointer-events-none absolute inset-0">
       {Array.from({ length: 8 }).map((_, i) => {
-        const angle  = (i / 8) * 360;
-        const rad    = (angle * Math.PI) / 180;
-        const tx     = Math.cos(rad) * 22;
-        const ty     = Math.sin(rad) * 22;
+        const angle = (i / 8) * 360;
+        const rad = (angle * Math.PI) / 180;
+        const tx = Math.cos(rad) * 22;
+        const ty = Math.sin(rad) * 22;
         const colors = ["#ef4444", "#f97316", "#fbbf24", "#ec4899", "#fff"];
         return (
-          <span key={i} style={{
-            position: "absolute", top: "50%", left: "50%",
-            width: "5px", height: "5px", borderRadius: "50%",
-            background: colors[i % colors.length],
-            transform: "translate(-50%,-50%)",
-            animation: `spark-pdp-${i} 0.55s ease-out forwards`,
-          }}>
+          <span
+            key={i}
+            style={{
+              position: "absolute",
+              top: "50%",
+              left: "50%",
+              width: "5px",
+              height: "5px",
+              borderRadius: "50%",
+              background: colors[i % colors.length],
+              transform: "translate(-50%,-50%)",
+              animation: `spark-pdp-${i} 0.55s ease-out forwards`,
+            }}
+          >
             <style>{`
               @keyframes spark-pdp-${i} {
                 0%   { transform:translate(-50%,-50%) translate(0,0) scale(1); opacity:1; }
@@ -533,153 +535,155 @@ function WishlistSparkles({ active }) {
   );
 }
 
-// ─────────────────────────────────────────────────────────────────────────────
-// STAR ROW
-// ─────────────────────────────────────────────────────────────────────────────
 function StarRow({ rating, reviews }) {
   return (
-    <div className="flex items-center gap-2">
+    <div className="flex items-center gap-2 flex-wrap">
       <div className="flex items-center gap-0.5">
         {[1, 2, 3, 4, 5].map((s) => (
-          <Star key={s} size={14}
+          <Star
+            key={s}
+            size={15}
             fill={s <= Math.floor(rating) ? "#F2B461" : "none"}
             color={s <= Math.floor(rating) ? "#F2B461" : "#D1D5DB"}
           />
         ))}
       </div>
-      <span className="text-[13px] font-semibold text-text-primary">{rating} Star Rating</span>
-      <span className="text-[13px] text-text-secondary">({reviews} User feedback)</span>
+      <span className="text-[13px] font-semibold text-text-primary">
+        {rating} Star Rating
+      </span>
+      <span className="text-[13px] text-text-secondary">
+        ({reviews} User feedback)
+      </span>
     </div>
   );
 }
 
-// ─────────────────────────────────────────────────────────────────────────────
-// MAIN COMPONENT
-// Accepts `product` prop from page.js (the full product object from PRODUCTS)
-// ─────────────────────────────────────────────────────────────────────────────
 export default function ProductDetailPage({ product }) {
-
-  // ── Derived data from new structure ────────────────────────────────────────
-
-  // All size options from dimensions array
   const SIZES = product.dimensions.map((d) => d.size);
-
-  // Color entries that have an actual color (filter out color:null entries)
   const COLOR_ENTRIES = product.images.filter((i) => i.color !== null);
-  const HAS_COLORS    = COLOR_ENTRIES.length > 0;
-
-  // Flat array of all images across all color entries (for thumbnail slider)
+  const HAS_COLORS = COLOR_ENTRIES.length > 0;
   const ALL_IMAGES = product.images.flatMap((entry) => entry.images);
+  const SIMILAR = PRODUCTS.filter(
+    (p) => p.category === product.category && p.id !== product.id,
+  ).slice(0, 4);
 
-  // Similar products — same category, exclude current
-  const SIMILAR = PRODUCTS
-    .filter((p) => p.category === product.category && p.id !== product.id)
-    .slice(0, 4);
+  const [activeImage, setActiveImage] = useState(0);
+  const [activeBtn, setActiveBtn] = useState(null);
+  const [selectedColor, setSelectedColor] = useState(0);
+  const [selectedSize, setSelectedSize] = useState(SIZES[0]);
+  const [isSizeOpen, setIsSizeOpen] = useState(false);
+  const [wishlisted, setWishlisted] = useState(false);
+  const [sparkle, setSparkle] = useState(false);
+  const [quantity, setQuantity] = useState(1);
+  const [activeTab, setActiveTab] = useState("description");
 
-  // ── State ──────────────────────────────────────────────────────────────────
-  const [activeImage,   setActiveImage]   = useState(0);
-  const [activeBtn,     setActiveBtn]     = useState(null);
-  const [selectedColor, setSelectedColor] = useState(0); // index into COLOR_ENTRIES
-  const [selectedSize,  setSelectedSize]  = useState(SIZES[0]);
-  const [isSizeOpen,    setIsSizeOpen]    = useState(false);
-  const [wishlisted,    setWishlisted]    = useState(false);
-  const [sparkle,       setSparkle]       = useState(false);
-  const [quantity,      setQuantity]      = useState(1);
-  const [activeTab,     setActiveTab]     = useState("description");
-
-  const sizeRef     = useRef(null);
+  const sizeRef = useRef(null);
   const isAnimating = useRef(false);
+  const touchStartX = useRef(null);
 
-  // ── Derived price from selected dimension ──────────────────────────────────
-  const selectedDimension = product.dimensions.find((d) => d.size === selectedSize)
-    || product.dimensions[0];
-  const mrp      = selectedDimension.mrp;
-  const price    = Math.round(mrp * (1 - product.discount / 100));
+  const selectedDimension =
+    product.dimensions.find((d) => d.size === selectedSize) ||
+    product.dimensions[0];
+  const mrp = selectedDimension.mrp;
+  const price = Math.round(mrp * (1 - product.discount / 100));
   const discount = product.discount;
 
-  // ── Sync wishlist on mount ──────────────────────────────────────────────────
   useEffect(() => {
     const saved = JSON.parse(localStorage.getItem("glowison_wishlist") || "[]");
     setWishlisted(saved.some((item) => item.id === product.id));
   }, [product.id]);
 
-  // ── Close size dropdown on outside click ───────────────────────────────────
   useEffect(() => {
     const handler = (e) => {
-      if (sizeRef.current && !sizeRef.current.contains(e.target)) setIsSizeOpen(false);
+      if (sizeRef.current && !sizeRef.current.contains(e.target))
+        setIsSizeOpen(false);
     };
     document.addEventListener("mousedown", handler);
     return () => document.removeEventListener("mousedown", handler);
   }, []);
 
-  // ── Wishlist handler ────────────────────────────────────────────────────────
   const handleWishlist = () => {
     const saved = JSON.parse(localStorage.getItem("glowison_wishlist") || "[]");
     if (!wishlisted) {
       setSparkle(true);
       setTimeout(() => setSparkle(false), 600);
-      localStorage.setItem("glowison_wishlist", JSON.stringify([...saved, {
-        id:           product.id,
-        name:         product.title,
-        price,
-        originalPrice: mrp,
-        images:        ALL_IMAGES,
-        category:      product.category,
-        slug:          product.slug,
-        rating:        product.rating,
-        reviews:       product.reviews,
-        badge:         product.badge || null,
-      }]));
+      localStorage.setItem(
+        "glowison_wishlist",
+        JSON.stringify([
+          ...saved,
+          {
+            id: product.id,
+            name: product.title,
+            price,
+            originalPrice: mrp,
+            images: ALL_IMAGES,
+            category: product.category,
+            slug: product.slug,
+            rating: product.rating,
+            reviews: product.reviews,
+            badge: product.badge || null,
+          },
+        ]),
+      );
     } else {
-      localStorage.setItem("glowison_wishlist",
-        JSON.stringify(saved.filter((i) => i.id !== product.id))
+      localStorage.setItem(
+        "glowison_wishlist",
+        JSON.stringify(saved.filter((i) => i.id !== product.id)),
       );
     }
     setWishlisted((w) => !w);
     window.dispatchEvent(new Event("wishlistUpdate"));
   };
 
-  // ── Image slider ────────────────────────────────────────────────────────────
   const goNext = useCallback(() => {
     if (isAnimating.current) return;
     isAnimating.current = true;
     setActiveBtn("right");
     setActiveImage((prev) => (prev + 1) % ALL_IMAGES.length);
-    setTimeout(() => { isAnimating.current = false; setActiveBtn(null); }, 400);
+    setTimeout(() => {
+      isAnimating.current = false;
+      setActiveBtn(null);
+    }, 400);
   }, [ALL_IMAGES.length]);
 
   const goPrev = useCallback(() => {
     if (isAnimating.current) return;
     isAnimating.current = true;
     setActiveBtn("left");
-    setActiveImage((prev) => (prev - 1 + ALL_IMAGES.length) % ALL_IMAGES.length);
-    setTimeout(() => { isAnimating.current = false; setActiveBtn(null); }, 400);
+    setActiveImage(
+      (prev) => (prev - 1 + ALL_IMAGES.length) % ALL_IMAGES.length,
+    );
+    setTimeout(() => {
+      isAnimating.current = false;
+      setActiveBtn(null);
+    }, 400);
   }, [ALL_IMAGES.length]);
 
-  // ── Share handler ───────────────────────────────────────────────────────────
   const handleShare = () => {
-    const url = typeof window !== "undefined"
-      ? `${window.location.origin}/${product.category}/${product.slug}`
-      : "";
+    const url =
+      typeof window !== "undefined"
+        ? `${window.location.origin}/${product.category}/${product.slug}`
+        : "";
     if (navigator.share) navigator.share({ title: product.title, url });
-    else { navigator.clipboard.writeText(url); alert("Link copied!"); }
+    else {
+      navigator.clipboard.writeText(url);
+      alert("Link copied!");
+    }
   };
 
-  // ── Color → jump to first image of that color ──────────────────────────────
   const handleColorChange = (colorIdx) => {
     setSelectedColor(colorIdx);
     if (!HAS_COLORS) return;
-    const colorEntry  = COLOR_ENTRIES[colorIdx];
-    const firstImg    = colorEntry.images[0];
-    const globalIdx   = ALL_IMAGES.indexOf(firstImg);
+    const firstImg = COLOR_ENTRIES[colorIdx].images[0];
+    const globalIdx = ALL_IMAGES.indexOf(firstImg);
     if (globalIdx !== -1) setActiveImage(globalIdx);
   };
 
-  // ── WhatsApp message ────────────────────────────────────────────────────────
-  const colorLabel     = HAS_COLORS ? COLOR_ENTRIES[selectedColor]?.color : "N/A";
-  const productUrl     = typeof window !== "undefined"
-    ? `${window.location.origin}/${product.category}/${product.slug}`
-    : "";
+  const colorLabel = HAS_COLORS ? COLOR_ENTRIES[selectedColor]?.color : "N/A";
+  const productUrl =
+    typeof window !== "undefined"
+      ? `${window.location.origin}/${product.category}/${product.slug}`
+      : "";
 
   const buyNowMessage = [
     `🛒 GLOWISON PURCHASE REQUEST`,
@@ -703,27 +707,25 @@ export default function ProductDetailPage({ product }) {
     `Please confirm availability and share payment details.`,
     `Thank you! 😊`,
     `━━━━━━━━━━━━━━━━━━━━━━`,
-  ].filter(Boolean).join("\n");
+  ]
+    .filter(Boolean)
+    .join("\n");
 
-  // ── Cart product object ─────────────────────────────────────────────────────
   const cartProduct = {
-    id:           product.id,
-    name:         product.title,
-    category:     product.category,
+    id: product.id,
+    name: product.title,
+    category: product.category,
     price,
     originalPrice: mrp,
-    images:        ALL_IMAGES,
-    badge:         product.badge  || null,
-    rating:        product.rating || null,
-    reviews:       product.reviews || null,
+    images: ALL_IMAGES,
+    badge: product.badge || null,
+    rating: product.rating || null,
+    reviews: product.reviews || null,
     selectedColor: HAS_COLORS ? colorLabel : null,
-    qty:           quantity,
-    slug:          product.slug,
+    qty: quantity,
+    slug: product.slug,
   };
 
-  // ─────────────────────────────────────────────────────────────────────────────
-  // RENDER
-  // ─────────────────────────────────────────────────────────────────────────────
   return (
     <>
       <style>{`
@@ -738,85 +740,128 @@ export default function ProductDetailPage({ product }) {
 
       <div className="min-h-screen bg-bg-main">
         <div className="max-w-7xl mx-auto px-4 md:px-6 py-6">
-
-          {/* ── Breadcrumb ── */}
+          {/* Breadcrumb */}
           <nav className="flex items-center gap-1.5 text-[13px] mb-6 flex-wrap pb-4 border-b border-border">
-            <Link href="/" className="text-text-secondary hover:text-blue transition-colors">Home</Link>
+            <Link
+              href="/"
+              className="text-text-secondary hover:text-blue transition-colors"
+            >
+              Home
+            </Link>
             <ChevronRight size={12} className="text-text-secondary" />
-            <Link href="/products" className="text-text-secondary hover:text-blue transition-colors">All Products</Link>
+            <Link
+              href="/products"
+              className="text-text-secondary hover:text-blue transition-colors"
+            >
+              All Products
+            </Link>
             <ChevronRight size={12} className="text-text-secondary" />
-            <Link href={`/${product.category}`} className="text-text-secondary hover:text-blue transition-colors capitalize">
+            <Link
+              href={`/${product.category}`}
+              className="text-text-secondary hover:text-blue transition-colors capitalize"
+            >
               {product.category.replace(/-/g, " ")}
             </Link>
             <ChevronRight size={12} className="text-text-secondary" />
-            <span className="text-text-primary font-medium">{product.title}</span>
+            <span className="text-text-primary font-medium">
+              {product.title}
+            </span>
           </nav>
 
-          {/* ── Main grid ── */}
+          {/* Main grid */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8 lg:gap-12 mb-10">
-
             {/* LEFT — Images */}
             <div className="flex flex-col gap-3">
               <div
                 className="relative rounded-2xl overflow-hidden bg-white border border-border shadow-soft"
                 style={{ aspectRatio: "4/3" }}
+                onTouchStart={(e) => {
+                  touchStartX.current = e.touches[0].clientX;
+                }}
+                onTouchEnd={(e) => {
+                  if (touchStartX.current === null) return;
+                  const diff =
+                    touchStartX.current - e.changedTouches[0].clientX;
+                  if (Math.abs(diff) > 40) diff > 0 ? goNext() : goPrev();
+                  touchStartX.current = null;
+                }}
               >
-                <img
-                  key={activeImage}
-                  src={ALL_IMAGES[activeImage]}
-                  alt={product.title}
-                  className="w-full h-full object-cover img-fade"
-                />
+                {/* Sliding strip */}
+                <div
+                  className="flex h-full"
+                  style={{
+                    width: `${ALL_IMAGES.length * 100}%`,
+                    transform: `translateX(-${activeImage * (100 / ALL_IMAGES.length)}%)`,
+                    transition: "transform 0.35s cubic-bezier(0.4,0,0.2,1)",
+                  }}
+                >
+                  {ALL_IMAGES.map((img, i) => (
+                    <div
+                      key={i}
+                      className="h-full shrink-0"
+                      style={{ width: `${100 / ALL_IMAGES.length}%` }}
+                    >
+                      <img
+                        src={img}
+                        alt={product.title}
+                        className="w-full h-full object-cover"
+                        draggable={false}
+                      />
+                    </div>
+                  ))}
+                </div>
                 <div className="absolute top-3 left-3 bg-gold text-blue-dark text-[10px] font-bold px-2.5 py-1 rounded-full z-10">
                   -{discount}% OFF
                 </div>
               </div>
-
-              {/* Thumbnail slider */}
               <div className="relative flex items-center gap-2">
-                <button onClick={goPrev}
-                  className={`shrink-0 w-9 h-16 rounded-r-2xl flex items-center justify-center shadow-md transition-all duration-300 cursor-pointer ${
-                    activeBtn === "left" ? "bg-gold text-white" : "bg-white text-blue-dark hover:bg-gold hover:text-white"
-                  }`}
+                <button
+                  onClick={goPrev}
+                  className={`shrink-0 w-9 h-16 rounded-r-2xl flex items-center justify-center shadow-md transition-all duration-300 cursor-pointer ${activeBtn === "left" ? "bg-gold text-white" : "bg-white text-blue-dark hover:bg-gold hover:text-white"}`}
                 >
                   <ChevronLeft size={16} />
                 </button>
                 <div className="flex gap-2 overflow-x-auto flex-1 scrollbar-hide">
                   {ALL_IMAGES.map((img, i) => (
-                    <button key={i} onClick={() => setActiveImage(i)}
-                      className={`rounded-xl overflow-hidden border-2 transition-all duration-200 shrink-0 w-16 h-16 ${
-                        activeImage === i
-                          ? "border-blue shadow-md scale-105"
-                          : "border-border hover:border-blue opacity-70 hover:opacity-100"
-                      }`}
+                    <button
+                      key={i}
+                      onClick={() => setActiveImage(i)}
+                      className={`rounded-xl overflow-hidden border-2 transition-all duration-200 shrink-0 w-16 h-16 ${activeImage === i ? "border-blue shadow-md" : "border-border hover:border-blue opacity-70 hover:opacity-100"}`}
                     >
-                      <img src={img} alt="" className="w-full h-full object-cover" />
+                      <img
+                        src={img}
+                        alt=""
+                        className="w-full h-full object-cover"
+                      />
                     </button>
                   ))}
                 </div>
-                <button onClick={goNext}
-                  className={`shrink-0 w-9 h-16 rounded-l-2xl flex items-center justify-center shadow-md transition-all duration-300 cursor-pointer ${
-                    activeBtn === "right" ? "bg-gold text-white" : "bg-white text-blue-dark hover:bg-gold hover:text-white"
-                  }`}
+                <button
+                  onClick={goNext}
+                  className={`shrink-0 w-9 h-16 rounded-l-2xl flex items-center justify-center shadow-md transition-all duration-300 cursor-pointer ${activeBtn === "right" ? "bg-gold text-white" : "bg-white text-blue-dark hover:bg-gold hover:text-white"}`}
                 >
                   <ChevronRight size={16} />
                 </button>
               </div>
             </div>
 
-            {/* RIGHT — Details */}
-            <div className="flex flex-col gap-3 pt-5">
-              <StarRow rating={product.rating} reviews={product.reviews} />
+            {/* ── RIGHT — Details (improved) ── */}
+            <div className="flex flex-col gap-4">
+              {/* Stars + title */}
+              <div className="flex flex-col gap-2.5">
+                <StarRow rating={product.rating} reviews={product.reviews} />
+                <h1 className="pdp-heading text-3xl font-bold text-blue-dark leading-snug">
+                  {product.title}
+                </h1>
+              </div>
 
-              <h1 className="pdp-heading text-3xl font-bold text-blue-dark leading-snug">
-                {product.title}
-              </h1>
-
-              {/* Meta info grid */}
-              <div className="grid grid-cols-2 gap-x-6 gap-y-2 text-[13px] mt-1">
+              {/* Meta info */}
+              <div className="grid grid-cols-2 gap-x-6 gap-y-1.5 text-[13px]">
                 <div>
                   <span className="text-text-secondary">ID: </span>
-                  <span className="font-semibold text-text-primary">GLW-{product.id.toString().padStart(5, "0")}</span>
+                  <span className="font-semibold text-text-primary">
+                    GLW-{product.id.toString().padStart(5, "0")}
+                  </span>
                 </div>
                 <div>
                   <span className="text-text-secondary">Availability: </span>
@@ -834,58 +879,90 @@ export default function ProductDetailPage({ product }) {
                 </div>
               </div>
 
-              {/* Price — updates with selected size */}
-              <div className="flex items-center gap-3 mt-1">
-                <span className="text-3xl font-bold text-blue-dark">₹{price.toLocaleString()}</span>
-                <span className="text-[15px] text-text-secondary line-through">₹{mrp.toLocaleString()}</span>
-                <span className="text-[12px] font-bold bg-gold text-blue-dark px-2.5 py-1 rounded-lg">
-                  {discount}% OFF
+              {/* Price */}
+              <div className="flex items-center gap-3">
+                <span className="text-[32px] font-bold text-blue-dark leading-none">
+                  ₹{price.toLocaleString()}
                 </span>
+                <div className="flex flex-col">
+                  <span className="text-[13px] text-text-secondary line-through">
+                    ₹{mrp.toLocaleString()}
+                  </span>
+                  <span className="text-[11px] font-bold bg-gold text-blue-dark px-2 py-0.5 rounded-md w-fit">
+                    {discount}% OFF
+                  </span>
+                </div>
               </div>
 
-              <div className="h-px bg-border mt-1 mb-1" />
+              <div className="h-px bg-border" />
 
-              {/* Color + Size row */}
-              <div className="flex flex-col md:flex-row gap-4">
-
-                {/* Color selector — only shown if product has colors */}
+              {/* ── Color + Size ── */}
+              <div className="flex flex-col sm:flex-row gap-4">
+                {/* Color — full card-style selector */}
                 {HAS_COLORS && (
                   <div className="flex-1">
-                    <p className="text-[12px] font-semibold text-text-secondary uppercase tracking-wider mb-2">Color</p>
-                    <div className="border border-border rounded-xl px-4 h-12 bg-white flex items-center justify-between">
-                      <div className="flex items-center gap-2.5">
-                        <span
-                          className="w-5 h-5 rounded-full border border-border shrink-0"
-                          style={{ background: COLOR_ENTRIES[selectedColor]?.hex || "#ccc" }}
-                        />
-                        <span className="text-[14px] font-medium text-text-primary capitalize">
-                          {COLOR_ENTRIES[selectedColor]?.color}
-                        </span>
-                      </div>
-                      <div className="flex items-center gap-1.5">
-                        {COLOR_ENTRIES.map((c, i) => (
-                          <button
-                            key={i}
-                            onClick={() => handleColorChange(i)}
-                            className="cursor-pointer"
-                            title={c.color}
+                    <p className="text-[11px] font-bold text-text-secondary uppercase tracking-wider mb-2">
+                      Color
+                      <span className="ml-2 font-semibold text-text-primary normal-case tracking-normal capitalize">
+                        — {COLOR_ENTRIES[selectedColor]?.color}
+                      </span>
+                    </p>
+                    <div className="flex flex-wrap gap-2">
+                      {COLOR_ENTRIES.map((c, i) => (
+                        <button
+                          key={i}
+                          type="button"
+                          title={c.color}
+                          onClick={() => handleColorChange(i)}
+                          className="relative flex flex-col items-center gap-1.5 cursor-pointer group"
+                        >
+                          {/* Swatch circle */}
+                          <span
+                            className="block rounded-full transition-all duration-200"
                             style={{
-                              width: "18px", height: "18px", borderRadius: "50%",
+                              width: selectedColor === i ? 38 : 32,
+                              height: selectedColor === i ? 38 : 32,
                               background: c.hex || "#ccc",
-                              border: selectedColor === i ? "2px solid #475792" : "1px solid #ddd",
-                              transform: selectedColor === i ? "scale(1.1)" : "scale(1)",
-                              transition: "all 0.2s ease",
+                              border:
+                                selectedColor === i
+                                  ? "3px solid var(--color-blue-dark)"
+                                  : "2px solid #dde1ea",
+                              boxShadow:
+                                selectedColor === i
+                                  ? "0 0 0 3px rgba(71,87,146,0.18)"
+                                  : "none",
                             }}
                           />
-                        ))}
-                      </div>
+                          {/* Color name label */}
+                          <span
+                            className="text-[10px] font-semibold capitalize leading-none"
+                            style={{
+                              color:
+                                selectedColor === i
+                                  ? "var(--color-blue-dark)"
+                                  : "var(--color-text-secondary)",
+                            }}
+                          >
+                            {c.color}
+                          </span>
+                          {/* Active check */}
+                          {selectedColor === i && (
+                            <span className="absolute -top-0.5 -right-0.5 w-4 h-4 rounded-full bg-blue-dark border-2 border-white flex items-center justify-center">
+                              <Check size={8} color="white" strokeWidth={3} />
+                            </span>
+                          )}
+                        </button>
+                      ))}
                     </div>
                   </div>
                 )}
 
                 {/* Size dropdown */}
-                <div className={`${HAS_COLORS ? "flex-1" : "w-full"} relative`} ref={sizeRef}>
-                  <p className="text-[12px] font-semibold text-text-secondary uppercase tracking-wider mb-2">
+                <div
+                  className={`${HAS_COLORS ? "flex-1" : "w-full"} relative`}
+                  ref={sizeRef}
+                >
+                  <p className="text-[11px] font-bold text-text-secondary uppercase tracking-wider mb-2">
                     Size (inch)
                   </p>
                   <button
@@ -893,19 +970,26 @@ export default function ProductDetailPage({ product }) {
                     className="w-full h-12 border border-border rounded-xl px-4 bg-white flex items-center justify-between text-[14px] font-medium text-text-primary hover:border-blue transition-all cursor-pointer"
                   >
                     <span>{selectedSize}</span>
-                    <ChevronDown size={16} className={`transition-transform duration-300 ${isSizeOpen ? "rotate-180" : ""}`} />
+                    <ChevronDown
+                      size={16}
+                      className={`transition-transform duration-300 text-text-secondary ${isSizeOpen ? "rotate-180" : ""}`}
+                    />
                   </button>
                   {isSizeOpen && (
                     <div className="absolute top-[calc(100%+6px)] left-0 right-0 z-50 bg-white border border-border rounded-xl shadow-hover overflow-hidden">
                       {SIZES.map((size) => {
                         const dimPrice = Math.round(
-                          (product.dimensions.find((d) => d.size === size)?.mrp || 0) *
-                          (1 - discount / 100)
+                          (product.dimensions.find((d) => d.size === size)
+                            ?.mrp || 0) *
+                            (1 - discount / 100),
                         );
                         return (
                           <button
                             key={size}
-                            onClick={() => { setSelectedSize(size); setIsSizeOpen(false); }}
+                            onClick={() => {
+                              setSelectedSize(size);
+                              setIsSizeOpen(false);
+                            }}
                             className={`w-full text-left px-4 py-3 text-[14px] transition-colors flex items-center justify-between cursor-pointer ${
                               selectedSize === size
                                 ? "bg-blue-soft text-blue font-bold"
@@ -913,7 +997,9 @@ export default function ProductDetailPage({ product }) {
                             }`}
                           >
                             <span>{size}</span>
-                            <span className="text-[13px] font-semibold">₹{dimPrice.toLocaleString()}</span>
+                            <span className="text-[13px] font-semibold">
+                              ₹{dimPrice.toLocaleString()}
+                            </span>
                           </button>
                         );
                       })}
@@ -922,135 +1008,219 @@ export default function ProductDetailPage({ product }) {
                 </div>
               </div>
 
-              {/* Qty + Wishlist + Add to Cart */}
-              <div className="flex items-center gap-2 mt-1">
-                <div className="flex items-center border border-border rounded-xl overflow-hidden bg-white shrink-0">
+              <div className="h-px bg-border" />
+
+              {/* ── Qty + Wishlist + Add to Cart ── */}
+              <div className="flex items-stretch gap-3">
+                {/* Qty stepper */}
+                <div className="flex items-center border border-border rounded-xl overflow-hidden bg-white shrink-0 h-12">
                   <button
                     onClick={() => setQuantity((q) => Math.max(1, q - 1))}
-                    className="w-9 h-10 flex items-center justify-center cursor-pointer text-text-secondary hover:bg-blue-soft hover:text-blue transition-colors"
+                    className="w-10 h-full flex items-center justify-center cursor-pointer text-text-secondary hover:bg-blue-soft hover:text-blue transition-colors"
                   >
-                    <Minus size={13} />
+                    <Minus size={14} />
                   </button>
-                  <span className="w-9 text-center font-bold text-[14px] text-text-primary border-x border-border">
+                  <span className="w-10 text-center font-bold text-[15px] text-text-primary border-x border-border">
                     {quantity}
                   </span>
                   <button
                     onClick={() => setQuantity((q) => q + 1)}
-                    className="w-9 h-10 flex items-center justify-center cursor-pointer text-text-secondary hover:bg-blue-soft hover:text-blue transition-colors"
+                    className="w-10 h-full flex items-center justify-center cursor-pointer text-text-secondary hover:bg-blue-soft hover:text-blue transition-colors"
                   >
-                    <Plus size={13} />
+                    <Plus size={14} />
                   </button>
                 </div>
 
+                {/* Wishlist */}
                 <button
                   onClick={handleWishlist}
-                  className={`relative w-10 h-10 rounded-xl border flex items-center justify-center cursor-pointer transition-all duration-200 shrink-0 ${
-                    wishlisted ? "border-red-300 bg-red-50" : "border-border bg-white hover:border-red-300 hover:bg-red-50"
+                  className={`relative w-12 h-12 rounded-xl border flex items-center justify-center cursor-pointer transition-all duration-200 shrink-0 ${
+                    wishlisted
+                      ? "border-red-300 bg-red-50"
+                      : "border-border bg-white hover:border-red-300 hover:bg-red-50"
                   }`}
                 >
                   <WishlistSparkles active={sparkle} />
-                  <Heart size={16} fill={wishlisted ? "#ef4444" : "transparent"} color={wishlisted ? "#ef4444" : "#6B7280"} />
+                  <Heart
+                    size={17}
+                    fill={wishlisted ? "#ef4444" : "transparent"}
+                    color={wishlisted ? "#ef4444" : "#6B7280"}
+                  />
                 </button>
 
+                {/* Add to Cart — full width */}
                 <div className="flex-1">
                   <AddToCartButton product={cartProduct} />
                 </div>
               </div>
 
+              {/* Running total */}
               {quantity > 1 && (
-                <p className="text-[12px] text-text-secondary -mt-0.5">
-                  Total: <span className="font-bold text-blue-dark">₹{(price * quantity).toLocaleString()}</span>
+                <p className="text-[12px] text-text-secondary">
+                  Total:{" "}
+                  <span className="font-bold text-blue-dark">
+                    ₹{(price * quantity).toLocaleString()}
+                  </span>
                 </p>
               )}
 
-              {/* Buy Now + Share */}
-              <div className="flex items-center gap-2 mt-1">
+              {/* ── Buy Now + Share ── */}
+              <div className="flex items-stretch gap-3">
                 <div className="flex-1">
-                  <BuyNowButton message={buyNowMessage} label="Buy Now" />
+                  <BuyNowButton
+                    mode="direct"
+                    label="Buy Now"
+                    product={{
+                      id: product.id,
+                      name: product.title,
+                      category: product.category,
+                      images: ALL_IMAGES,
+                      selectedColor: HAS_COLORS ? colorLabel : null,
+                      size: selectedSize,
+                      rating: product.rating || null,
+                      reviews: product.reviews || null,
+                      qty: quantity,
+                      slug: product.slug,
+                    }}
+                    price={price}
+                    mrp={mrp}
+                  />
                 </div>
                 <button
                   onClick={handleShare}
-                  className="h-11 px-4 rounded-xl border border-border bg-white flex items-center gap-2 text-[13px] font-semibold text-text-secondary hover:border-blue hover:text-blue hover:bg-blue-soft transition-all duration-200 shrink-0 cursor-pointer"
+                  className="h-12 px-5 rounded-xl border border-border bg-white flex items-center gap-2 text-[13px] font-semibold text-text-secondary hover:border-blue hover:text-blue hover:bg-blue-soft transition-all duration-200 shrink-0 cursor-pointer"
                 >
-                  <Share2 size={15} /> Share
+                  <Share2 size={15} />
+                  <span className="hidden sm:inline">Share</span>
                 </button>
               </div>
 
               {/* WhatsApp note */}
-              <div className="flex items-start gap-2 px-3 py-2 rounded-xl bg-[#f0fdf4] border border-[#bbf7d0]">
-                <span className="text-[#16a34a] text-[13px] shrink-0 mt-0.5">✓</span>
-                <p className="text-[11px] text-[#15803d] leading-relaxed">
-                  Clicking <span className="font-bold">"Buy Now"</span> opens WhatsApp with{" "}
-                  <span className="font-bold">{selectedSize}</span> size details pre-filled.
-                  Just hit <span className="font-bold">Send</span>!
+              <div className="flex items-start gap-2.5 px-3 py-3 rounded-xl bg-[#f0fdf4] border border-[#bbf7d0]">
+                <span className="text-[#16a34a] text-[14px] shrink-0 mt-0.5">
+                  ✓
+                </span>
+                <p className="text-[12px] text-[#15803d] leading-relaxed">
+                  Clicking <span className="font-bold">"Buy Now"</span> opens
+                  WhatsApp with{" "}
+                  <span className="font-bold">{selectedSize}</span> size details
+                  pre-filled. Just hit <span className="font-bold">Send</span>!
                 </p>
               </div>
             </div>
+            {/* ── END RIGHT ── */}
           </div>
 
-          {/* ── Description / Review Tabs ── */}
+          {/* Tabs */}
           <div className="bg-white rounded-2xl border border-border shadow-soft mb-12 overflow-hidden">
             <div className="flex border-b border-border">
               {["description", "review"].map((tab) => (
-                <button key={tab} onClick={() => setActiveTab(tab)}
+                <button
+                  key={tab}
+                  onClick={() => setActiveTab(tab)}
                   className={`px-6 py-4 text-[13px] font-semibold uppercase tracking-wider transition-all duration-200 relative cursor-pointer ${
-                    activeTab === tab ? "text-blue-dark" : "text-text-secondary hover:text-text-primary"
+                    activeTab === tab
+                      ? "text-blue-dark"
+                      : "text-text-secondary hover:text-text-primary"
                   }`}
                 >
                   {tab}
-                  {activeTab === tab && <span className="absolute bottom-0 left-0 right-0 h-0.5 bg-gold" />}
+                  {activeTab === tab && (
+                    <span className="absolute bottom-0 left-0 right-0 h-0.5 bg-gold" />
+                  )}
                 </button>
               ))}
             </div>
-
             <div className="p-6">
               {activeTab === "description" ? (
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-
-                  {/* Description */}
                   <div>
-                    <h3 className="font-bold text-[15px] text-text-primary mb-3">Description</h3>
-                    <p className="text-[13px] text-text-secondary leading-relaxed">{product.description}</p>
+                    <h3 className="font-bold text-[15px] text-text-primary mb-3">
+                      Description
+                    </h3>
+                    <p className="text-[13px] text-text-secondary leading-relaxed">
+                      {product.description}
+                    </p>
                   </div>
-
-                  {/* Features + Specs */}
                   <div>
-                    <h3 className="font-bold text-[15px] text-text-primary mb-3">Features</h3>
+                    <h3 className="font-bold text-[15px] text-text-primary mb-3">
+                      Features
+                    </h3>
                     <ul className="flex flex-col gap-2 mb-5">
                       {(product.features || []).map((f, i) => (
-                        <li key={i} className="flex items-start gap-2 text-[13px] text-text-secondary">
-                          <Check size={13} className="mt-0.5 shrink-0 text-gold" />{f}
+                        <li
+                          key={i}
+                          className="flex items-start gap-2 text-[13px] text-text-secondary"
+                        >
+                          <Check
+                            size={13}
+                            className="mt-0.5 shrink-0 text-gold"
+                          />
+                          {f}
                         </li>
                       ))}
                     </ul>
-                    <h3 className="font-bold text-[15px] text-text-primary mb-3">Specifications</h3>
+                    <h3 className="font-bold text-[15px] text-text-primary mb-3">
+                      Specifications
+                    </h3>
                     <ul className="flex flex-col gap-2">
                       {(product.specifications || []).map((s, i) => (
-                        <li key={i} className="flex items-start gap-2 text-[13px] text-text-secondary">
-                          <Check size={13} className="mt-0.5 shrink-0 text-blue" />{s}
+                        <li
+                          key={i}
+                          className="flex items-start gap-2 text-[13px] text-text-secondary"
+                        >
+                          <Check
+                            size={13}
+                            className="mt-0.5 shrink-0 text-blue"
+                          />
+                          {s}
                         </li>
                       ))}
                     </ul>
                   </div>
-
-                  {/* Shipping */}
                   <div>
-                    <h3 className="font-bold text-[15px] text-text-primary mb-3">Shipping Information</h3>
+                    <h3 className="font-bold text-[15px] text-text-primary mb-3">
+                      Shipping Information
+                    </h3>
                     <div className="flex flex-col gap-3">
                       {[
-                        { icon: Truck,       label: "Standard Delivery", value: "5–7 business days, Free" },
-                        { icon: Package,     label: "Express Delivery",  value: "2–3 business days, ₹99" },
-                        { icon: RefreshCw,   label: "Easy Returns",      value: "7-day hassle-free return" },
-                        { icon: ShieldCheck, label: "Warranty",          value: "1 Year manufacturing warranty" },
-                        { icon: Headphones,  label: "Customer Support",  value: "24/7 WhatsApp support" },
+                        {
+                          icon: Truck,
+                          label: "Standard Delivery",
+                          value: "5–7 business days, Free",
+                        },
+                        {
+                          icon: Package,
+                          label: "Express Delivery",
+                          value: "2–3 business days, ₹99",
+                        },
+                        {
+                          icon: RefreshCw,
+                          label: "Easy Returns",
+                          value: "7-day hassle-free return",
+                        },
+                        {
+                          icon: ShieldCheck,
+                          label: "Warranty",
+                          value: "1 Year manufacturing warranty",
+                        },
+                        {
+                          icon: Headphones,
+                          label: "Customer Support",
+                          value: "24/7 WhatsApp support",
+                        },
                       ].map(({ icon: Icon, label, value }) => (
                         <div key={label} className="flex items-start gap-3">
                           <div className="w-8 h-8 rounded-lg bg-blue-soft flex items-center justify-center shrink-0">
                             <Icon size={15} className="text-blue" />
                           </div>
                           <div>
-                            <p className="text-[12px] font-semibold text-text-primary">{label}</p>
-                            <p className="text-[12px] text-text-secondary">{value}</p>
+                            <p className="text-[12px] font-semibold text-text-primary">
+                              {label}
+                            </p>
+                            <p className="text-[12px] text-text-secondary">
+                              {value}
+                            </p>
                           </div>
                         </div>
                       ))}
@@ -1061,18 +1231,23 @@ export default function ProductDetailPage({ product }) {
                 <div className="text-center py-10 text-text-secondary">
                   <Star size={32} className="mx-auto mb-3 opacity-30" />
                   <p className="font-semibold text-[15px]">No reviews yet</p>
-                  <p className="text-[13px] mt-1">Be the first to review this product.</p>
+                  <p className="text-[13px] mt-1">
+                    Be the first to review this product.
+                  </p>
                 </div>
               )}
             </div>
           </div>
 
-          {/* ── Similar Products ── */}
+          {/* Similar Products */}
           {SIMILAR.length > 0 && (
             <div>
               <div className="flex items-center justify-between mb-5">
-                <h2 className="pdp-heading text-xl font-bold text-blue-dark">Similar Products</h2>
-                <Link href={`/${product.category}`}
+                <h2 className="pdp-heading text-xl font-bold text-blue-dark">
+                  Similar Products
+                </h2>
+                <Link
+                  href={`/${product.category}`}
                   className="flex items-center gap-1.5 text-[13px] font-semibold text-text-primary border border-border px-4 py-2 rounded-full hover:border-blue hover:text-blue transition-all duration-200"
                 >
                   VIEW MORE <ChevronRight size={14} />
@@ -1080,12 +1255,17 @@ export default function ProductDetailPage({ product }) {
               </div>
               <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                 {SIMILAR.map((p) => {
-                  const bs      = BADGE_STYLES[p.badge] || { bg: "#475792", color: "#fff" };
+                  const bs = BADGE_STYLES[p.badge] || {
+                    bg: "#475792",
+                    color: "#fff",
+                  };
                   const simImgs = p.images.flatMap((e) => e.images);
-                  const simMrp  = p.dimensions[0]?.mrp || 0;
+                  const simMrp = p.dimensions[0]?.mrp || 0;
                   const simPrice = Math.round(simMrp * (1 - p.discount / 100));
                   return (
-                    <Link key={p.id} href={`/${p.category}/${p.slug}`}
+                    <Link
+                      key={p.id}
+                      href={`/${p.category}/${p.slug}`}
                       className="bg-white rounded-2xl overflow-hidden border border-border shadow-soft hover:shadow-hover transition-all duration-300 hover:-translate-y-1 group"
                     >
                       <div className="relative aspect-square overflow-hidden bg-bg-main">
@@ -1095,7 +1275,8 @@ export default function ProductDetailPage({ product }) {
                           className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
                         />
                         {p.badge && (
-                          <div className="absolute top-2 left-2 text-[10px] font-bold uppercase px-2.5 py-1 rounded-full"
+                          <div
+                            className="absolute top-2 left-2 text-[10px] font-bold uppercase px-2.5 py-1 rounded-full"
                             style={{ background: bs.bg, color: bs.color }}
                           >
                             {p.badge}
@@ -1110,8 +1291,12 @@ export default function ProductDetailPage({ product }) {
                           {p.title}
                         </h3>
                         <div className="flex items-center gap-2">
-                          <span className="text-[15px] font-bold text-blue-dark">₹{simPrice.toLocaleString()}</span>
-                          <span className="text-[11px] text-text-secondary line-through">₹{simMrp.toLocaleString()}</span>
+                          <span className="text-[15px] font-bold text-blue-dark">
+                            ₹{simPrice.toLocaleString()}
+                          </span>
+                          <span className="text-[11px] text-text-secondary line-through">
+                            ₹{simMrp.toLocaleString()}
+                          </span>
                         </div>
                       </div>
                     </Link>
@@ -1120,7 +1305,6 @@ export default function ProductDetailPage({ product }) {
               </div>
             </div>
           )}
-
         </div>
       </div>
     </>
