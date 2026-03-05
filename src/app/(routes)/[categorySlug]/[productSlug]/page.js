@@ -7,6 +7,7 @@
 import { notFound }      from "next/navigation";
 import { PRODUCTS }      from "@/app/data/productsData";     // ← critical import
 import ProductDetailPage from "@/app/components/products/ProductDetail";
+import { Suspense } from "react";
 
 // ── SEO metadata ──────────────────────────────────────────────────────────────
 export async function generateMetadata({ params }) {
