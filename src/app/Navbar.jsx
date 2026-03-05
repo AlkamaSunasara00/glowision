@@ -9,8 +9,7 @@ import {
   Tag, Package, Sparkles,
 } from "lucide-react";
 import Link from "next/link";
-// import { useRouter, usePathname, useSearchParams } from "next/navigation";
-import { useRouter, usePathname } from "next/navigation";
+import { useRouter, usePathname, useSearchParams } from "next/navigation";
 import { CATEGORIES } from "@/app/data/categoriesData";
 import { PRODUCTS }   from "@/app/data/productsData";
 
@@ -743,7 +742,7 @@ function Sidebar({ open, onClose, pathname, searchParams }) {
 // ─────────────────────────────────────────────────────────────────────────────
 export default function Navbar() {
   const pathname     = usePathname();
-const [searchParams, setSearchParams] = useState(new URLSearchParams());
+  const searchParams = useSearchParams();
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [searchOpen,  setSearchOpen]  = useState(false);
   const [cartCount,   setCartCount]   = useState(0);
@@ -752,12 +751,6 @@ const [searchParams, setSearchParams] = useState(new URLSearchParams());
 
   // Ref for the search trigger button — passed to DesktopSearch for positioning
   const searchTriggerRef = useRef(null);
-
-  useEffect(() => {
-  if (typeof window !== "undefined") {
-    setSearchParams(new URLSearchParams(window.location.search));
-  }
-}, [pathname]);
 
   useEffect(() => {
     const read = () => {
