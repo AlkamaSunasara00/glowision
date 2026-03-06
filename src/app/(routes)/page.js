@@ -18,10 +18,10 @@ export default function HeroPage() {
   return (
     <>
       <HeroSlider />
-      <ProductsSection />
-      <StatsBar />
       <CategoryShowcase />
-      <BestSellers />
+      
+      <StatsBar />
+      <ProductsSection />
       <TagProductsSection
         tag="eid"
         heading="Eid Celebration Picks"
@@ -29,8 +29,9 @@ export default function HeroPage() {
         viewMoreLabel="View Eid"
       />
       <WhyChooseUs />
-      <CustomCTABanner/>
       <GiftingSection />
+      <CustomCTABanner/>
+      
       <Testimonials />
       <InstagramGallery />
       <FAQ/>

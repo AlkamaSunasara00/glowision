@@ -248,10 +248,49 @@ export default function QuotePage() {
     handleFile(e.dataTransfer.files[0]);
   };
 
-const handleSubmit = (e) => {
+const handleSubmit = async (e) => {
   e.preventDefault();
 
   const phone = process.env.NEXT_PUBLIC_WHATSAPP_NUMBER;
+
+  let imageUrl = "";
+
+  try {
+    if (form.image) {
+      const reader = new FileReader();
+
+      const base64 = await new Promise((resolve) => {
+        reader.onloadend = () => {
+          const result = reader.result;
+          const base64String = result.split(",")[1];
+          resolve(base64String);
+        };
+        reader.readAsDataURL(form.image);
+      });
+
+      const res = await fetch(
+        "https://api.imgbb.com/1/upload?key=970ffc5df9e5c6a910d148f28f81596c",
+        {
+          method: "POST",
+          body: new URLSearchParams({
+            image: base64,
+          }),
+        }
+      );
+
+      const data = await res.json();
+
+      console.log("ImgBB Response:", data);
+
+      if (data.success) {
+        imageUrl = data.data.url;
+      } else {
+        console.error("Image upload failed:", data);
+      }
+    }
+  } catch (err) {
+    console.error("Image upload error:", err);
+  }
 
   const categoryLabels = form.category
     .map((c) => CATEGORIES.find((x) => x.value === c)?.label)
@@ -293,9 +332,7 @@ const handleSubmit = (e) => {
     `📝 *Design Description*`,
     form.description || "No description provided",
     ``,
-    form.image
-      ? `📷 Reference image uploaded (customer will send image in chat)`
-      : null,
+    imageUrl ? `📷 *Reference Image* : ${imageUrl}` : null,
   ]
     .filter(Boolean)
     .join("\n");
@@ -304,6 +341,8 @@ const handleSubmit = (e) => {
 
   window.open(url, "_blank");
 };
+
+
 
   // ── Success screen ──────────────────────────────────────────────────────────
   if (submitted) {

@@ -3,19 +3,25 @@
 
 import Link from "next/link";
 import { ArrowRight, Gift } from "lucide-react";
-import { PRODUCTS } from "@/app/data/productsData";
-import ProductCard  from "@/app/ui/cards/ProductCard";
+import { PRODUCTS }   from "@/app/data/productsData";
+import { CATEGORIES } from "@/app/data/categoriesData";
+import ProductCard     from "@/app/ui/cards/ProductCard";
 
-const OCCASIONS = [
-  { label: "Eid Gifts",       slug: "eid-special",        emoji: "🌙" },
-  { label: "Wedding Gifts",   slug: "gift-sets",          emoji: "💍" },
-  { label: "Housewarming",    slug: "islamic-wall-art",   emoji: "🏠" },
-  { label: "Ramadan",         slug: "ramadan-collection", emoji: "✨" },
-];
+const SUB_EMOJI = {
+  "wedding-gifts":      "💍",
+  "birthday-gifts":     "🎂",
+  "housewarming-gifts": "🏠",
+  "eid-gifts":          "🌙",
+};
 
 export default function GiftingSection() {
+  // Pull subcategories directly from CATEGORIES data
+  const giftsCategory  = CATEGORIES.find((c) => c.slug === "gifts");
+  const subcategories  = giftsCategory?.subcategories ?? [];
+
+  // Products from the gifts category
   const giftProducts = PRODUCTS
-    .filter((p) => ["gift-sets", "eid-special", "ramadan-collection"].includes(p.category) || p.badge === "Sale")
+    .filter((p) => p.category === "gifts")
     .slice(0, 4);
 
   return (
@@ -40,15 +46,16 @@ export default function GiftingSection() {
             </p>
           </div>
 
-          {/* Occasion pills */}
+          {/* Occasion pills — pulled from CATEGORIES subcategories */}
           <div className="flex flex-wrap gap-2">
-            {OCCASIONS.map(({ label, slug, emoji }) => (
-              <Link key={slug} href={`/${slug}`}
+            {subcategories.map(({ name, slug }) => (
+              <Link key={slug} href={`/gifts/sub/${slug}`}
                 className="flex items-center gap-2 px-4 py-2 rounded-full text-[12px] font-semibold transition-all"
                 style={{ background: "var(--color-bg-main)", border: "1px solid var(--color-border)", color: "var(--color-text-primary)" }}
                 onMouseEnter={(e) => { e.currentTarget.style.background = "var(--color-blue-dark)"; e.currentTarget.style.color = "white"; e.currentTarget.style.borderColor = "var(--color-blue-dark)"; }}
-                onMouseLeave={(e) => { e.currentTarget.style.background = "var(--color-bg-main)"; e.currentTarget.style.color = "var(--color-text-primary)"; e.currentTarget.style.borderColor = "var(--color-border)"; }}>
-                <span>{emoji}</span> {label}
+                onMouseLeave={(e) => { e.currentTarget.style.background = "var(--color-bg-main)"; e.currentTarget.style.color = "var(--color-text-primary)"; e.currentTarget.style.borderColor = "var(--color-border)"; }}
+              >
+                <span>{SUB_EMOJI[slug] ?? "🎁"}</span> {name}
               </Link>
             ))}
           </div>
@@ -76,13 +83,16 @@ export default function GiftingSection() {
             </div>
           </div>
           <Link href="/quote">
-            <button style={{ display: "flex", alignItems: "center", gap: 6, padding: "10px 22px", borderRadius: "999px", background: "var(--color-blue-dark)", color: "white", fontWeight: 700, fontSize: "13px", cursor: "pointer", border: "none", fontFamily: "'DM Sans',sans-serif", whiteSpace: "nowrap", transition: "all 0.2s ease" }}
+            <button
+              style={{ display: "flex", alignItems: "center", gap: 6, padding: "10px 22px", borderRadius: "999px", background: "var(--color-blue-dark)", color: "white", fontWeight: 700, fontSize: "13px", cursor: "pointer", border: "none", fontFamily: "'DM Sans',sans-serif", whiteSpace: "nowrap", transition: "all 0.2s ease" }}
               onMouseEnter={(e) => { e.currentTarget.style.transform = "translateY(-1px)"; e.currentTarget.style.boxShadow = "0 8px 20px rgba(26,46,110,0.25)"; }}
-              onMouseLeave={(e) => { e.currentTarget.style.transform = "translateY(0)"; e.currentTarget.style.boxShadow = "none"; }}>
+              onMouseLeave={(e) => { e.currentTarget.style.transform = "translateY(0)"; e.currentTarget.style.boxShadow = "none"; }}
+            >
               Customise a Gift <ArrowRight size={14} />
             </button>
           </Link>
         </div>
+
       </div>
     </section>
   );

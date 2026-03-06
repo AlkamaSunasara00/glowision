@@ -831,7 +831,7 @@ export default function ProductDetailPage({ product }) {
                       <img
                         src={img}
                         alt=""
-                        className="w-full h-full object-cover"
+                        className="w-full h-full object-fit"
                       />
                     </button>
                   ))}
