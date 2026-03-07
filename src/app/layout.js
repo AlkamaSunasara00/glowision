@@ -18,7 +18,7 @@ const inter = Inter({
 });
 
 export const metadata = {
-  metadataBase: new URL("https://glowisongraphics.com"),
+  metadataBase: new URL("https://glowision.vercel.app"),
 
   title: {
     default: "Glowison | Laser Cutting, Printing & Design Services in Palanpur",
@@ -90,7 +90,7 @@ export const metadata = {
     "geo.region": "IN-GJ",
     "geo.placename": "Palanpur, Gujarat",
     "geo.position": "24.1745;72.4330",
-    "ICBM": "24.1745, 72.4330",
+    ICBM: "24.1745, 72.4330",
   },
 };
 
@@ -106,6 +106,29 @@ export default function RootLayout({ children }) {
         </Suspense>
 
         {children}
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{
+            __html: JSON.stringify({
+              "@context": "https://schema.org",
+              "@type": "LocalBusiness",
+              name: "Glowison Graphics",
+              image: "https://glowisongraphics.com/og-image.jpg",
+              url: "https://glowision.vercel.app",
+              telephone: "+91-9624721516",
+              address: {
+                "@type": "PostalAddress",
+                streetAddress: "Galaxy Complex, Opp Hotel Ekta",
+                addressLocality: "Chhapi",
+                addressRegion: "Gujarat",
+                postalCode: "385210",
+                addressCountry: "IN",
+              },
+              areaServed: ["Palanpur", "Chhapi", "Banaskantha", "Gujarat"],
+              sameAs: ["https://www.instagram.com/glowisongraphics"],
+            }),
+          }}
+        />
 
         <Footer />
 
@@ -116,35 +139,3 @@ export default function RootLayout({ children }) {
     </html>
   );
 }
-
-
-<script
-  type="application/ld+json"
-  dangerouslySetInnerHTML={{
-    __html: JSON.stringify({
-      "@context": "https://schema.org",
-      "@type": "LocalBusiness",
-      name: "Glowison Graphics",
-      image: "https://glowisongraphics.com/og-image.jpg",
-      url: "https://glowisongraphics.com",
-      telephone: "+91-9624721516",
-      address: {
-        "@type": "PostalAddress",
-        streetAddress: "Galaxy Complex, Opp Hotel Ekta",
-        addressLocality: "Chhapi",
-        addressRegion: "Gujarat",
-        postalCode: "385210",
-        addressCountry: "IN",
-      },
-      areaServed: [
-        "Palanpur",
-        "Chhapi",
-        "Banaskantha",
-        "Gujarat"
-      ],
-      sameAs: [
-        "https://www.instagram.com/glowison"
-      ]
-    }),
-  }}
-/>
