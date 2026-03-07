@@ -25,6 +25,10 @@ export const metadata = {
     template: "%s | Glowison Graphics",
   },
 
+  verification: {
+    google: "IQ_6o34Ylzouizf3r7-53Uh8c4aBEnXEbCCePVX_4P8",
+  },
+
   description:
     "Glowison provides professional laser cutting, acrylic name plates, MDF cutting, visiting card printing, digital printing and custom wall decor in Palanpur, Chhapi and Banaskantha, Gujarat.",
 
@@ -55,9 +59,6 @@ export const metadata = {
     description:
       "Professional laser cutting, acrylic name plates, wall decor and digital printing services in Palanpur, Chhapi and Banaskantha.",
     url: "https://glowision.vercel.app",
-      verification: {
-    google: "IQ_6o34Ylzouizf3r7-53Uh8c4aBEnXEbCCePVX_4P8",
-  },
     siteName: "Glowison",
     images: [
       {
