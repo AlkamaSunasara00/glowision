@@ -771,79 +771,102 @@ export default function ProductDetailPage({ product }) {
           {/* Main grid */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8 lg:gap-12 mb-10">
             {/* LEFT — Images */}
-            <div className="flex flex-col gap-3">
-              <div
-                className="relative rounded-2xl overflow-hidden bg-white border border-border shadow-soft"
-                style={{ aspectRatio: "4/3" }}
-                onTouchStart={(e) => {
-                  touchStartX.current = e.touches[0].clientX;
-                }}
-                onTouchEnd={(e) => {
-                  if (touchStartX.current === null) return;
-                  const diff =
-                    touchStartX.current - e.changedTouches[0].clientX;
-                  if (Math.abs(diff) > 40) diff > 0 ? goNext() : goPrev();
-                  touchStartX.current = null;
-                }}
-              >
-                {/* Sliding strip */}
-                <div
-                  className="flex h-full"
-                  style={{
-                    width: `${ALL_IMAGES.length * 100}%`,
-                    transform: `translateX(-${activeImage * (100 / ALL_IMAGES.length)}%)`,
-                    transition: "transform 0.35s cubic-bezier(0.4,0,0.2,1)",
-                  }}
-                >
-                  {ALL_IMAGES.map((img, i) => (
-                    <div
-                      key={i}
-                      className="h-full shrink-0"
-                      style={{ width: `${100 / ALL_IMAGES.length}%` }}
-                    >
-                      <img
-                        src={img}
-                        alt={product.title}
-                        className="w-full h-full object-cover"
-                        draggable={false}
-                      />
-                    </div>
-                  ))}
-                </div>
-                <div className="absolute top-3 left-3 bg-gold text-blue-dark text-[10px] font-bold px-2.5 py-1 rounded-full z-10">
-                  -{discount}% OFF
-                </div>
-              </div>
-              <div className="relative flex items-center gap-2">
-                <button
-                  onClick={goPrev}
-                  className={`shrink-0 w-9 h-16 rounded-r-2xl flex items-center justify-center shadow-md transition-all duration-300 cursor-pointer ${activeBtn === "left" ? "bg-gold text-white" : "bg-white text-blue-dark hover:bg-gold hover:text-white"}`}
-                >
-                  <ChevronLeft size={16} />
-                </button>
-                <div className="flex gap-2 overflow-x-auto flex-1 scrollbar-hide">
-                  {ALL_IMAGES.map((img, i) => (
-                    <button
-                      key={i}
-                      onClick={() => setActiveImage(i)}
-                      className={`rounded-xl overflow-hidden border-2 transition-all duration-200 shrink-0 w-16 h-16 ${activeImage === i ? "border-blue shadow-md" : "border-border hover:border-blue opacity-70 hover:opacity-100"}`}
-                    >
-                      <img
-                        src={img}
-                        alt=""
-                        className="w-full h-full object-fit"
-                      />
-                    </button>
-                  ))}
-                </div>
-                <button
-                  onClick={goNext}
-                  className={`shrink-0 w-9 h-16 rounded-l-2xl flex items-center justify-center shadow-md transition-all duration-300 cursor-pointer ${activeBtn === "right" ? "bg-gold text-white" : "bg-white text-blue-dark hover:bg-gold hover:text-white"}`}
-                >
-                  <ChevronRight size={16} />
-                </button>
-              </div>
-            </div>
+            {/* ── LEFT — Images (FIXED for 1024×1024 square product images) ────────────────── */}
+            {/* Replace the entire LEFT column div in your ProductDetailPage */}
+
+<div className="flex flex-col gap-3">
+  {/* ── Main image ── */}
+  <div
+    className="pdp-main-img-wrap relative rounded-2xl overflow-hidden bg-white border border-border shadow-soft"
+    style={{ aspectRatio: "1 / 1" }}
+    onTouchStart={(e) => { touchStartX.current = e.touches[0].clientX; }}
+    onTouchEnd={(e) => {
+      if (touchStartX.current === null) return;
+      const diff = touchStartX.current - e.changedTouches[0].clientX;
+      if (Math.abs(diff) > 40) diff > 0 ? goNext() : goPrev();
+      touchStartX.current = null;
+    }}
+  >
+    <style>{`
+      @media (min-width: 768px) {
+        .pdp-main-img-wrap { aspect-ratio: 5 / 4 !important; }
+        .pdp-main-img-wrap img { object-fit: cover !important; }
+      }
+    `}</style>
+
+    {/* Sliding strip */}
+    <div
+      className="flex h-full"
+      style={{
+        width: `${ALL_IMAGES.length * 100}%`,
+        transform: `translateX(-${activeImage * (100 / ALL_IMAGES.length)}%)`,
+        transition: "transform 0.35s cubic-bezier(0.4,0,0.2,1)",
+      }}
+    >
+      {ALL_IMAGES.map((img, i) => (
+        <div
+          key={i}
+          className="h-full shrink-0"
+          style={{ width: `${100 / ALL_IMAGES.length}%` }}
+        >
+          <img
+            src={img}
+            alt={product.title}
+            className="w-full h-full object-contain"
+            draggable={false}
+          />
+        </div>
+      ))}
+    </div>
+
+    {/* Discount badge */}
+    <div className="absolute top-3 left-3 bg-gold text-blue-dark text-[10px] font-bold px-2.5 py-1 rounded-full z-10">
+      -{discount}% OFF
+    </div>
+  </div>
+
+  {/* ── Thumbnail strip ── */}
+  <div className="relative flex items-center gap-2">
+    <button
+      onClick={goPrev}
+      className={`shrink-0 w-9 h-16 rounded-r-2xl flex items-center justify-center shadow-md transition-all duration-300 cursor-pointer ${
+        activeBtn === "left"
+          ? "bg-gold text-white"
+          : "bg-white text-blue-dark hover:bg-gold hover:text-white"
+      }`}
+    >
+      <ChevronLeft size={16} />
+    </button>
+
+    <div className="flex gap-2 overflow-x-auto flex-1 scrollbar-hide">
+      {ALL_IMAGES.map((img, i) => (
+        <button
+          key={i}
+          onClick={() => setActiveImage(i)}
+          className={`rounded-xl overflow-hidden border-2 transition-all duration-200 shrink-0 ${
+            activeImage === i
+              ? "border-blue shadow-md scale-105"
+              : "border-border hover:border-blue opacity-70 hover:opacity-100"
+          }`}
+          style={{ width: 64, height: 64, background: "#f8f9fc" }}
+        >
+          <img src={img} alt="" className="w-full h-full object-contain" />
+        </button>
+      ))}
+    </div>
+
+    <button
+      onClick={goNext}
+      className={`shrink-0 w-9 h-16 rounded-l-2xl flex items-center justify-center shadow-md transition-all duration-300 cursor-pointer ${
+        activeBtn === "right"
+          ? "bg-gold text-white"
+          : "bg-white text-blue-dark hover:bg-gold hover:text-white"
+      }`}
+    >
+      <ChevronRight size={16} />
+    </button>
+  </div>
+</div>
 
             {/* ── RIGHT — Details (improved) ── */}
             <div className="flex flex-col gap-4">

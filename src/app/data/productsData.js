@@ -35,6 +35,10 @@ keywords: [
 ],
 
 images: [
+  {
+color: null,
+images: ["/images/products/p4.png"],
+},
 {
 color: "gold",
 hex: "#D4A843",

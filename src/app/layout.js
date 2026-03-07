@@ -18,8 +18,79 @@ const inter = Inter({
 });
 
 export const metadata = {
-  title: "Glowison | Premium Islamic Wall Art & Decor",
-  description: "Discover premium Ayatul Kursi frames, Islamic wall clocks, and luxury home decor in India.",
+  metadataBase: new URL("https://glowisongraphics.com"),
+
+  title: {
+    default: "Glowison | Laser Cutting, Printing & Design Services in Palanpur",
+    template: "%s | Glowison Graphics",
+  },
+
+  description:
+    "Glowison provides professional laser cutting, acrylic name plates, MDF cutting, visiting card printing, digital printing and custom wall decor in Palanpur, Chhapi and Banaskantha, Gujarat.",
+
+  keywords: [
+    "Glowison",
+    "laser cutting Palanpur",
+    "laser cutting Chhapi",
+    "acrylic name plate Palanpur",
+    "MDF laser cutting Gujarat",
+    "visiting card printing Palanpur",
+    "digital printing Chhapi",
+    "wall decor laser cutting",
+    "custom name plate Gujarat",
+    "Glowison Graphics",
+  ],
+
+  authors: [{ name: "Glowison Graphics" }],
+  creator: "Glowison Graphics",
+  publisher: "Glowison Graphics",
+
+  robots: {
+    index: true,
+    follow: true,
+  },
+
+  openGraph: {
+    title: "Glowison | Laser Cutting & Printing Services",
+    description:
+      "Professional laser cutting, acrylic name plates, wall decor and digital printing services in Palanpur, Chhapi and Banaskantha.",
+    url: "https://glowision.vercel.app",
+      verification: {
+    google: "IQ_6o34Ylzouizf3r7-53Uh8c4aBEnXEbCCePVX_4P8",
+  },
+    siteName: "Glowison",
+    images: [
+      {
+        url: "/og-image.jpg",
+        width: 1200,
+        height: 630,
+        alt: "Glowison Laser Cutting & Printing",
+      },
+    ],
+    locale: "en_IN",
+    type: "website",
+  },
+
+  twitter: {
+    card: "summary_large_image",
+    title: "Glowison | Laser Cutting & Printing",
+    description:
+      "Laser cutting, acrylic name plates, digital printing and wall decor services in Palanpur & Chhapi.",
+    images: ["/og-image.jpg"],
+  },
+
+  alternates: {
+    canonical: "https://glowision.vercel.app",
+  },
+
+  category: "Business",
+
+  other: {
+    "geo.region": "IN-GJ",
+    "geo.placename": "Palanpur, Gujarat",
+    "geo.position": "24.1745;72.4330",
+    "ICBM": "24.1745, 72.4330",
+  },
 };
 
 export default function RootLayout({ children }) {
@@ -44,3 +115,35 @@ export default function RootLayout({ children }) {
     </html>
   );
 }
+
+
+<script
+  type="application/ld+json"
+  dangerouslySetInnerHTML={{
+    __html: JSON.stringify({
+      "@context": "https://schema.org",
+      "@type": "LocalBusiness",
+      name: "Glowison Graphics",
+      image: "https://glowisongraphics.com/og-image.jpg",
+      url: "https://glowisongraphics.com",
+      telephone: "+91-9624721516",
+      address: {
+        "@type": "PostalAddress",
+        streetAddress: "Galaxy Complex, Opp Hotel Ekta",
+        addressLocality: "Chhapi",
+        addressRegion: "Gujarat",
+        postalCode: "385210",
+        addressCountry: "IN",
+      },
+      areaServed: [
+        "Palanpur",
+        "Chhapi",
+        "Banaskantha",
+        "Gujarat"
+      ],
+      sameAs: [
+        "https://www.instagram.com/glowison"
+      ]
+    }),
+  }}
+/>

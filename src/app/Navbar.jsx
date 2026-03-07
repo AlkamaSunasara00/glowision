@@ -39,6 +39,7 @@ const FESTIVAL_NAV_ITEM = {
 const PRIMARY_NAV_LINKS = [STATIC_NAV[0], STATIC_NAV[1]];
 const BOTTOM_NAV_LINKS  = [STATIC_NAV[2], STATIC_NAV[3]];
 
+// REPLACE buildNavItems:
 function buildNavItems() {
   return [
     ...PRIMARY_NAV_LINKS,
@@ -46,9 +47,11 @@ function buildNavItems() {
     ...CATEGORIES.map((cat) => ({
       label:    cat.name,
       href:     `/${cat.slug}`,
+      image:    cat.image || null,
       children: cat.subcategories.map((sub) => ({
         label: sub.name,
         href:  `/${cat.slug}/sub/${sub.slug}`,
+        image: sub.image || null,   // ← pass sub image
       })),
     })),
     ...BOTTOM_NAV_LINKS,
@@ -59,22 +62,41 @@ const NAV_ITEMS = buildNavItems();
 // ─────────────────────────────────────────────────────────────────────────────
 // SEARCH DATA
 // ─────────────────────────────────────────────────────────────────────────────
+// REPLACE the existing buildAllSuggestions function with this:
 function buildAllSuggestions() {
   const list = [];
   CATEGORIES.forEach((cat) => {
     const count = PRODUCTS.filter((p) => p.category === cat.slug).length;
-    list.push({ type: "category", label: cat.name, subtitle: `${count} product${count !== 1 ? "s" : ""}`, href: `/${cat.slug}`, image: null });
+    list.push({
+      type: "category",
+      label: cat.name,
+      subtitle: `${count} product${count !== 1 ? "s" : ""}`,
+      href: `/${cat.slug}`,
+      image: cat.image || null,   // ← now uses cat.image
+    });
   });
   CATEGORIES.forEach((cat) => {
     cat.subcategories.forEach((sub) => {
       const count = PRODUCTS.filter((p) => p.category === cat.slug && p.subcategory === sub.slug).length;
-      list.push({ type: "subcategory", label: sub.name, subtitle: `in ${cat.name} · ${count} item${count !== 1 ? "s" : ""}`, href: `/${cat.slug}/sub/${sub.slug}`, image: null });
+      list.push({
+        type: "subcategory",
+        label: sub.name,
+        subtitle: `in ${cat.name} · ${count} item${count !== 1 ? "s" : ""}`,
+        href: `/${cat.slug}/sub/${sub.slug}`,
+        image: sub.image || null,  // ← now uses sub.image
+      });
     });
   });
   PRODUCTS.forEach((p) => {
     const mrp   = p.dimensions[0]?.mrp || 0;
     const price = Math.round(mrp * (1 - p.discount / 100));
-    list.push({ type: "product", label: p.title, subtitle: `₹${price.toLocaleString()} · ${p.category.replace(/-/g, " ")}`, href: `/${p.category}/${p.slug}`, image: p.images.flatMap((e) => e.images)[0] || null });
+    list.push({
+      type: "product",
+      label: p.title,
+      subtitle: `₹${price.toLocaleString()} · ${p.category.replace(/-/g, " ")}`,
+      href: `/${p.category}/${p.slug}`,
+      image: p.images.flatMap((e) => e.images)[0] || null,
+    });
   });
   return list;
 }
@@ -118,17 +140,21 @@ function Highlight({ text, query }) {
   );
 }
 
+// REPLACE the existing SuggestionIcon function with this:
 function SuggestionIcon({ item }) {
-  if (item.type === "product") {
+  // All three types now show a real image if available
+  if (item.image) {
     return (
-      <div style={{ width: 38, height: 38, borderRadius: 8, overflow: "hidden", flexShrink: 0, background: "var(--color-bg-main)", border: "1px solid var(--color-border)" }}>
-        {item.image
-          ? <img src={item.image} alt="" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
-          : <Package size={16} style={{ margin: "11px auto 0", color: "var(--color-text-secondary)", display: "block" }} />
-        }
+      <div style={{
+        width: 38, height: 38, borderRadius: 8, overflow: "hidden", flexShrink: 0,
+        background: "var(--color-bg-main)", border: "1px solid var(--color-border)",
+      }}>
+        <img src={item.image} alt="" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
       </div>
     );
   }
+
+  // Fallback icons when no image
   if (item.type === "category") {
     return (
       <div style={{ width: 38, height: 38, borderRadius: 8, flexShrink: 0, display: "flex", alignItems: "center", justifyContent: "center", background: "var(--color-blue-soft)", border: "1px solid var(--color-blue)" }}>
@@ -136,9 +162,17 @@ function SuggestionIcon({ item }) {
       </div>
     );
   }
+  if (item.type === "subcategory") {
+    return (
+      <div style={{ width: 38, height: 38, borderRadius: 8, flexShrink: 0, display: "flex", alignItems: "center", justifyContent: "center", background: "var(--color-gold-soft)", border: "1px solid var(--color-gold)" }}>
+        <div style={{ width: 8, height: 8, borderRadius: "50%", background: "var(--color-gold)" }} />
+      </div>
+    );
+  }
+  // product fallback
   return (
-    <div style={{ width: 38, height: 38, borderRadius: 8, flexShrink: 0, display: "flex", alignItems: "center", justifyContent: "center", background: "var(--color-gold-soft)", border: "1px solid var(--color-gold)" }}>
-      <div style={{ width: 8, height: 8, borderRadius: "50%", background: "var(--color-gold)" }} />
+    <div style={{ width: 38, height: 38, borderRadius: 8, overflow: "hidden", flexShrink: 0, background: "var(--color-bg-main)", border: "1px solid var(--color-border)" }}>
+      <Package size={16} style={{ margin: "11px auto 0", color: "var(--color-text-secondary)", display: "block" }} />
     </div>
   );
 }
@@ -178,34 +212,27 @@ function IconWithBadge({ href, icon: Icon, count, label }) {
 // DROPDOWN SUBCATEGORY ROW ICON — no more AI blue dot
 // Each subcategory gets a clean 2-letter monogram chip
 // ─────────────────────────────────────────────────────────────────────────────
-function SubcategoryChip({ label }) {
-  // Pick the initials from the label, max 2 chars
-  const initials = label
-    .split(" ")
-    .map((w) => w[0])
-    .join("")
-    .slice(0, 2)
-    .toUpperCase();
-
+// REPLACE SubcategoryChip:
+function SubcategoryChip({ label, image }) {
+  if (image) {
+    return (
+      <div style={{
+        width: 32, height: 32, borderRadius: 9, flexShrink: 0,
+        overflow: "hidden", border: "1.5px solid var(--color-border)",
+      }}>
+        <img src={image} alt={label} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+      </div>
+    );
+  }
+  // Monogram fallback
+  const initials = label.split(" ").map((w) => w[0]).join("").slice(0, 2).toUpperCase();
   return (
-    <div
-      style={{
-        width: 32,
-        height: 32,
-        borderRadius: 9,
-        flexShrink: 0,
-        display: "flex",
-        alignItems: "center",
-        justifyContent: "center",
-        background: "var(--color-bg-main)",
-        border: "1.5px solid var(--color-border)",
-        fontSize: 10,
-        fontWeight: 700,
-        color: "var(--color-blue-dark)",
-        letterSpacing: "0.04em",
-        userSelect: "none",
-      }}
-    >
+    <div style={{
+      width: 32, height: 32, borderRadius: 9, flexShrink: 0,
+      display: "flex", alignItems: "center", justifyContent: "center",
+      background: "var(--color-bg-main)", border: "1.5px solid var(--color-border)",
+      fontSize: 10, fontWeight: 700, color: "var(--color-blue-dark)", letterSpacing: "0.04em",
+    }}>
       {initials}
     </div>
   );
@@ -243,7 +270,7 @@ function Dropdown({ item, pathname, searchParams }) {
               }`}
               style={{ borderBottom: i < item.children.length - 1 ? "1px solid #f1f5f9" : "none" }}
             >
-              <SubcategoryChip label={child.label} />
+              <SubcategoryChip label={child.label} image={child.image} />
               <p className="flex-1 text-[13px] font-semibold text-text-primary group-hover/item:text-blue transition-colors">
                 {child.label}
               </p>
@@ -604,41 +631,68 @@ function Sidebar({ open, onClose, pathname, searchParams }) {
 
   return (
     <>
-      {open && <div className="fixed inset-0 z-[70] bg-black/45 backdrop-blur-sm" onClick={onClose} />}
-      <div className={`fixed left-0 top-0 h-full w-full bg-white z-[71] flex flex-col transition-transform duration-300 ease-in-out ${open ? "translate-x-0" : "-translate-x-full"}`}>
-        <div className="flex items-center justify-between px-5 py-4 border-b border-border">
+      {open && (
+        <div className="fixed inset-0 z-[70] bg-black/45 backdrop-blur-sm" onClick={onClose} />
+      )}
+
+      <div
+        className={`fixed left-0 top-0 h-full z-[71] flex flex-col bg-white transition-transform duration-300 ease-in-out
+          w-full md:w-[400px]
+          ${open ? "translate-x-0" : "-translate-x-full"}`}
+        style={{ boxShadow: open ? "4px 0 32px rgba(0,0,0,0.13)" : "none" }}
+      >
+        {/* ── Header ── */}
+        <div className="flex items-center justify-between px-5 py-4 border-b border-border shrink-0">
           <Link href="/" onClick={onClose}>
             <img src="/logos/logo1.png" alt="Glowison" className="h-10" />
           </Link>
-          <button onClick={onClose} className="w-9 h-9 rounded-[10px] bg-blue-dark flex items-center justify-center cursor-pointer border-none">
+          <button
+            onClick={onClose}
+            className="w-9 h-9 rounded-[10px] bg-blue-dark flex items-center justify-center cursor-pointer border-none"
+          >
             <X size={18} color="white" />
           </button>
         </div>
 
+        {/* ── Scrollable body ── */}
         <div className="flex-1 overflow-y-auto p-4 bg-bg-main [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+
           {PRIMARY_NAV_LINKS.map((item) => {
             const active = isHrefActive(item.href, pathname, searchParams);
             return (
-              <Link key={item.label} href={item.href} onClick={onClose}
-                className={`flex items-center justify-between px-4 py-3.5 mb-2.5 rounded-[14px] font-semibold text-[14px] no-underline transition-colors ${active ? "bg-blue-dark text-white" : "bg-white text-blue-dark hover:bg-blue-soft"}`}
-                style={{ border: "1.5px solid var(--color-border)" }}>
+              <Link
+                key={item.label}
+                href={item.href}
+                onClick={onClose}
+                className={`flex items-center justify-between px-4 py-3.5 mb-2.5 rounded-[14px] font-semibold text-[14px] no-underline transition-colors
+                  ${active ? "bg-blue-dark text-white" : "bg-white text-blue-dark hover:bg-blue-soft"}`}
+                style={{ border: "1.5px solid var(--color-border)" }}
+              >
                 {item.label}
                 <ArrowRight size={14} className={active ? "text-white" : "text-text-secondary"} />
               </Link>
             );
           })}
 
+          {/* Festival Store */}
           <div className="mb-2.5 rounded-[14px] border border-border bg-white p-3">
             <div className="mb-2 flex items-center gap-2 px-1">
               <Sparkles size={13} className="text-gold" />
-              <p className="text-[11px] font-bold uppercase tracking-[1px] text-text-secondary">Festival Store</p>
+              <p className="text-[11px] font-bold uppercase tracking-[1px] text-text-secondary">
+                Festival Store
+              </p>
             </div>
             <div className="space-y-1.5">
               {FESTIVAL_TABS.map((item) => {
                 const active = isHrefActive(item.href, pathname, searchParams);
                 return (
-                  <Link key={item.href} href={item.href} onClick={onClose}
-                    className={`flex items-center justify-between rounded-xl px-3 py-2.5 text-[13px] font-semibold no-underline transition-colors ${active ? "bg-blue-dark text-white" : "bg-bg-main text-blue-dark hover:bg-blue-soft"}`}>
+                  <Link
+                    key={item.href}
+                    href={item.href}
+                    onClick={onClose}
+                    className={`flex items-center justify-between rounded-xl px-3 py-2.5 text-[13px] font-semibold no-underline transition-colors
+                      ${active ? "bg-blue-dark text-white" : "bg-bg-main text-blue-dark hover:bg-blue-soft"}`}
+                  >
                     {item.label}
                     <ArrowRight size={13} className={active ? "text-white" : "text-text-secondary"} />
                   </Link>
@@ -647,10 +701,14 @@ function Sidebar({ open, onClose, pathname, searchParams }) {
             </div>
           </div>
 
+          {/* Categories */}
           {CATEGORIES.map((cat) => {
             const categoryActive =
               isHrefActive(`/${cat.slug}`, pathname, searchParams) ||
-              cat.subcategories.some((sub) => isHrefActive(`/${cat.slug}/sub/${sub.slug}`, pathname, searchParams));
+              cat.subcategories.some((sub) =>
+                isHrefActive(`/${cat.slug}/sub/${sub.slug}`, pathname, searchParams)
+              );
+
             return (
               <div key={cat.slug} className="mb-2.5">
                 <button
@@ -658,31 +716,99 @@ function Sidebar({ open, onClose, pathname, searchParams }) {
                   className="w-full px-4 py-3.5 rounded-[14px] font-semibold text-[14px] flex items-center justify-between cursor-pointer transition-all duration-200"
                   style={{
                     border:     expanded === cat.slug || categoryActive ? "1.5px solid var(--color-blue-dark)" : "1.5px solid var(--color-border)",
-                    background: expanded === cat.slug || categoryActive ? "var(--color-blue-dark)" : "var(--color-white)",
-                    color:      expanded === cat.slug || categoryActive ? "#fff" : "var(--color-blue-dark)",
-                  }}>
+                    background: expanded === cat.slug || categoryActive ? "var(--color-blue-dark)"             : "var(--color-white)",
+                    color:      expanded === cat.slug || categoryActive ? "#fff"                               : "var(--color-blue-dark)",
+                  }}
+                >
                   {cat.name}
-                  <ChevronDown size={16} style={{ color: expanded === cat.slug || categoryActive ? "#fff" : "var(--color-blue)", transform: expanded === cat.slug ? "rotate(180deg)" : "rotate(0)", transition: "transform 0.3s" }} />
+                  <ChevronDown
+                    size={16}
+                    style={{
+                      color:      expanded === cat.slug || categoryActive ? "#fff" : "var(--color-blue)",
+                      transform:  expanded === cat.slug ? "rotate(180deg)" : "rotate(0)",
+                      transition: "transform 0.3s",
+                    }}
+                  />
                 </button>
-                <div className="overflow-hidden transition-all duration-[350ms] ease-[cubic-bezier(0.4,0,0.2,1)]"
-                  style={{ maxHeight: expanded === cat.slug ? cat.subcategories.length * 60 + 60 : 0 }}>
+
+                <div
+                  className="overflow-hidden transition-all duration-[350ms] ease-[cubic-bezier(0.4,0,0.2,1)]"
+                  style={{ maxHeight: expanded === cat.slug ? cat.subcategories.length * 72 + 64 : 0 }}
+                >
                   <div className="mt-2 rounded-xl border border-border bg-white overflow-hidden">
-                    <Link href={`/${cat.slug}`} onClick={onClose}
-                      className={`flex items-center gap-3 px-3.5 py-3 border-b border-border transition-colors no-underline ${isHrefActive(`/${cat.slug}`, pathname, searchParams) ? "bg-blue-soft" : "hover:bg-blue-soft"}`}>
-                      <div className="w-[26px] h-[26px] rounded-lg bg-blue flex items-center justify-center shrink-0">
-                        <ArrowRight size={12} color="white" />
+
+                    {/* ── View All row ── */}
+                    <Link
+                      href={`/${cat.slug}`}
+                      onClick={onClose}
+                      className={`flex items-center gap-3 px-3.5 py-2.5 border-b border-border transition-colors no-underline
+                        ${isHrefActive(`/${cat.slug}`, pathname, searchParams) ? "bg-blue-soft" : "hover:bg-blue-soft"}`}
+                    >
+                      <div
+                        className="w-[38px] h-[38px] rounded-lg overflow-hidden shrink-0 border border-border"
+                        style={{ background: "var(--color-bg-main)" }}
+                      >
+                        {cat.image ? (
+                          <img
+                            src={cat.image}
+                            alt={cat.name}
+                            className="w-full h-full object-cover"
+                          />
+                        ) : (
+                          <div className="w-full h-full bg-blue flex items-center justify-center">
+                            <ArrowRight size={14} color="white" />
+                          </div>
+                        )}
                       </div>
-                      <span className="text-[13px] font-bold text-blue">View all {cat.name}</span>
+                      <span className="text-[13px] font-bold text-blue">
+                        View all {cat.name}
+                      </span>
                     </Link>
-                    {cat.subcategories.map((sub) => (
-                      <Link key={sub.slug} href={`/${cat.slug}/sub/${sub.slug}`} onClick={onClose}
-                        className={`flex items-center gap-3 px-3.5 py-3 border-b border-border last:border-b-0 transition-colors no-underline ${isHrefActive(`/${cat.slug}/sub/${sub.slug}`, pathname, searchParams) ? "bg-blue-soft" : "hover:bg-blue-soft"}`}>
-                        <div className="w-[26px] h-[26px] rounded-lg bg-gold-soft border border-gold flex items-center justify-center shrink-0">
-                          <div className="w-1.5 h-1.5 rounded-full bg-gold" />
-                        </div>
-                        <span className="text-[13px] font-semibold text-blue-dark">{sub.name}</span>
-                      </Link>
-                    ))}
+
+                    {/* ── Subcategory rows with images ── */}
+                    {cat.subcategories.map((sub) => {
+                      const subActive = isHrefActive(
+                        `/${cat.slug}/sub/${sub.slug}`,
+                        pathname,
+                        searchParams
+                      );
+                      return (
+                        <Link
+                          key={sub.slug}
+                          href={`/${cat.slug}/sub/${sub.slug}`}
+                          onClick={onClose}
+                          className={`flex items-center gap-3 px-3.5 py-2.5 border-b border-border last:border-b-0 transition-colors no-underline
+                            ${subActive ? "bg-blue-soft" : "hover:bg-blue-soft"}`}
+                        >
+                          {/* Subcategory image thumbnail */}
+                          <div
+                            className="w-[38px] h-[38px] rounded-lg overflow-hidden shrink-0 border border-border"
+                            style={{ background: "var(--color-bg-main)" }}
+                          >
+                            {sub.image ? (
+                              <img
+                                src={sub.image}
+                                alt={sub.name}
+                                className="w-full h-full object-cover"
+                              />
+                            ) : (
+                              /* fallback: first letter initial */
+                              <div
+                                className="w-full h-full flex items-center justify-center text-[12px] font-bold text-white"
+                                style={{ background: "var(--color-blue)" }}
+                              >
+                                {sub.name.charAt(0).toUpperCase()}
+                              </div>
+                            )}
+                          </div>
+
+                          <span className="text-[13px] font-semibold text-blue-dark leading-tight">
+                            {sub.name}
+                          </span>
+                        </Link>
+                      );
+                    })}
+
                   </div>
                 </div>
               </div>
@@ -692,9 +818,14 @@ function Sidebar({ open, onClose, pathname, searchParams }) {
           {BOTTOM_NAV_LINKS.map((item) => {
             const active = isHrefActive(item.href, pathname, searchParams);
             return (
-              <Link key={item.label} href={item.href} onClick={onClose}
-                className={`flex items-center justify-between px-4 py-3.5 mb-2.5 rounded-[14px] font-semibold text-[14px] no-underline transition-colors ${active ? "bg-blue-dark text-white" : "bg-white text-blue-dark hover:bg-blue-soft"}`}
-                style={{ border: "1.5px solid var(--color-border)" }}>
+              <Link
+                key={item.label}
+                href={item.href}
+                onClick={onClose}
+                className={`flex items-center justify-between px-4 py-3.5 mb-2.5 rounded-[14px] font-semibold text-[14px] no-underline transition-colors
+                  ${active ? "bg-blue-dark text-white" : "bg-white text-blue-dark hover:bg-blue-soft"}`}
+                style={{ border: "1.5px solid var(--color-border)" }}
+              >
                 {item.label}
                 <ArrowRight size={14} className={active ? "text-white" : "text-text-secondary"} />
               </Link>
@@ -702,15 +833,21 @@ function Sidebar({ open, onClose, pathname, searchParams }) {
           })}
         </div>
 
-        <div className="px-4 py-4 border-t border-border bg-white">
-          <p className="text-[10px] font-bold text-text-secondary uppercase tracking-[1px] mb-3">Contact Us</p>
+        {/* ── Contact ── */}
+        <div className="px-4 py-4 border-t border-border bg-white shrink-0">
+          <p className="text-[10px] font-bold text-text-secondary uppercase tracking-[1px] mb-3">
+            Contact Us
+          </p>
           {[
             { icon: Phone,  text: "+91 99787 50622",       color: "#16a34a"                },
             { icon: Mail,   text: "hello@glowison.com",    color: "var(--color-blue-dark)" },
             { icon: MapPin, text: "Surat, Gujarat, India", color: "#dc2626"                },
           ].map(({ icon: Icon, text, color }) => (
             <div key={text} className="flex items-center gap-2.5 mb-2.5 last:mb-0">
-              <div className="w-[30px] h-[30px] rounded-lg flex items-center justify-center shrink-0" style={{ background: color + "18", border: `1px solid ${color}35` }}>
+              <div
+                className="w-[30px] h-[30px] rounded-lg flex items-center justify-center shrink-0"
+                style={{ background: color + "18", border: `1px solid ${color}35` }}
+              >
                 <Icon size={14} style={{ color }} />
               </div>
               <span className="text-[12px] text-text-secondary font-medium">{text}</span>
@@ -718,15 +855,21 @@ function Sidebar({ open, onClose, pathname, searchParams }) {
           ))}
         </div>
 
-        <div className="px-4 pt-4 pb-6 border-t border-border bg-white">
-          <p className="text-[10px] font-bold text-text-secondary uppercase tracking-[1px] mb-2.5">Follow Us</p>
+        {/* ── Social ── */}
+        <div className="px-4 pt-4 pb-6 border-t border-border bg-white shrink-0">
+          <p className="text-[10px] font-bold text-text-secondary uppercase tracking-[1px] mb-2.5">
+            Follow Us
+          </p>
           <div className="flex gap-2.5">
             {[
               { icon: Instagram, color: "#E1306C" },
               { icon: Facebook,  color: "#1877F2" },
               { icon: Twitter,   color: "#1DA1F2" },
             ].map(({ icon: Icon, color }, i) => (
-              <button key={i} className="flex-1 py-2.5 rounded-[14px] bg-blue-soft border border-border flex items-center justify-center cursor-pointer hover:scale-105 transition-all duration-200">
+              <button
+                key={i}
+                className="flex-1 py-2.5 rounded-[14px] bg-blue-soft border border-border flex items-center justify-center cursor-pointer hover:scale-105 transition-all duration-200"
+              >
                 <Icon size={18} style={{ color }} />
               </button>
             ))}
