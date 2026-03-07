@@ -105,6 +105,12 @@ function ConfirmSheet({ open, onClose, onConfirm, itemCount, total }) {
           >
             Cancel
           </button>
+          <p className="text-[11px] text-text-secondary text-center mt-2 leading-relaxed">
+  By placing an order you agree to our{" "}
+  <a href="/shipping-policy" className="text-blue underline underline-offset-2 hover:text-blue-dark transition-colors">Shipping Policy</a>
+  {" & "}
+  <a href="/terms-of-use" className="text-blue underline underline-offset-2 hover:text-blue-dark transition-colors">Terms of Use</a>
+</p>
         </div>
       </div>
     </>
@@ -289,6 +295,12 @@ function ProductOrderSheet({ open, onClose, product, price, mrp }) {
             <WhatsAppIcon size={18} color="#22c55e" />
             Buy Now via WhatsApp
           </button>
+          <p className="text-[11px] text-text-secondary text-center mt-2 leading-relaxed">
+  By placing an order you agree to our{" "}
+  <a href="/shipping-policy" className="text-blue underline underline-offset-2 hover:text-blue-dark transition-colors">Shipping Policy</a>
+  {" & "}
+  <a href="/terms-of-use" className="text-blue underline underline-offset-2 hover:text-blue-dark transition-colors">Terms of Use</a>
+</p>
 
           <div className="flex items-start gap-2 mt-3 px-3 py-2 rounded-xl bg-[#f0fdf4] border border-[#bbf7d0]">
             <span className="text-[#16a34a] text-[12px] shrink-0 mt-0.5">✓</span>

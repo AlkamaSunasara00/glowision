@@ -1,44 +1,102 @@
 "use client";
 
 import { useState } from "react";
+import Link from "next/link";
 import {
-  Facebook, Instagram, Twitter,
-  Phone, Mail, MapPin, ChevronDown, ArrowRight,
+  Facebook,
+  Instagram,
+  Twitter,
+  Phone,
+  Mail,
+  MapPin,
+  ChevronDown,
+  ArrowRight,
 } from "lucide-react";
+import { CATEGORIES } from "@/app/data/categoriesData";
+
+// ── Build Explore links dynamically from CATEGORIES ──────────────────────────
+const EXPLORE_LINKS = [
+  { label: "All Products", href: "/products" },
+  ...CATEGORIES.map((cat) => ({ label: cat.name, href: `/${cat.slug}` })),
+  { label: "Custom Quote", href: "/quote" },
+  { label: "About Us", href: "/about-us" },
+  { label: "Contact Us", href: "/contact" },
+];
+
+const SERVICE_LINKS = [
+  { label: "Islamic Wall Art", href: "/islamic-wall-art" },
+  { label: "Name Plates", href: "#" },
+  { label: "Wall Clocks", href: "/islamic-wall-clocks" },
+  { label: "Bulk Orders", href: "/quote" },
+];
+
+const CONTACT_ITEMS = [
+  {
+    icon: Phone,
+    text: process.env.NEXT_PUBLIC_CONTACT_PHONE ?? "+91 99787 50622",
+    href: `tel:${process.env.NEXT_PUBLIC_CONTACT_PHONE ?? "+919978750622"}`,
+    color: "#16a34a",
+  },
+  {
+    icon: Mail,
+    text:
+      process.env.NEXT_PUBLIC_CONTACT_EMAIL ??
+      "connect.glowisonchhapi@gmail.com",
+    href: `mailto:${process.env.NEXT_PUBLIC_CONTACT_EMAIL ?? "connect.glowisonchhapi@gmail.com"}`,
+    color: "var(--color-blue)",
+  },
+  {
+    icon: MapPin,
+    text:
+      process.env.NEXT_PUBLIC_CONTACT_ADDRESS ??
+      "Galaxy Complex, Opp Hotel Ekta Palanpur- Ahmedabad Highway, Chhapi",
+    href: `https://maps.google.com/?q=${encodeURIComponent(process.env.NEXT_PUBLIC_CONTACT_ADDRESS ?? "Galaxy Complex, Opp Hotel Ekta Palanpur- Ahmedabad Highway, Chhapi")}`,
+    color: "#dc2626",
+  },
+];
+
+const SOCIAL = [
+  { icon: Instagram, color: "#E1306C" },
+  { icon: Facebook, color: "#1877F2" },
+  { icon: Twitter, color: "#1DA1F2" },
+];
 
 export default function Footer() {
   const [open, setOpen] = useState(null);
   const toggle = (key) => setOpen(open === key ? null : key);
 
   return (
-    <footer className="text-white mt-20 md:pb-0 pb-20" style={{ background: "var(--color-blue-dark)" }}>
-
+    <footer
+      className="text-white mt-20 md:pb-0 pb-20"
+      style={{ background: "var(--color-blue-dark)" }}
+    >
       {/* Top gold bar */}
-      <div className="h-1 w-full" style={{ background: "linear-gradient(90deg, transparent, var(--color-gold), transparent)" }} />
+      <div
+        className="h-1 w-full"
+        style={{
+          background:
+            "linear-gradient(90deg, transparent, var(--color-gold), transparent)",
+        }}
+      />
 
-      {/* ===== DESKTOP ===== */}
+      {/* ══════════════ DESKTOP ══════════════ */}
       <div className="hidden md:block max-w-7xl mx-auto px-8 pt-16 pb-12">
         <div className="grid grid-cols-12 gap-10">
-
-          {/* Brand */}
-          <div className="col-span-4">
+          {/* Brand col */}
+          <div className="col-span-3">
             <img
               src="/logos/logo2.png"
               alt="Glowison"
               className="h-12 w-auto object-contain mb-4"
-              // style={{ filter: "drop-shadow(0 0 8px rgba(255,255,255,0.8)) drop-shadow(0 0 3px rgba(255,255,255,1))" }}
             />
             <p className="text-[13px] leading-relaxed text-white/60 max-w-[260px] mt-5">
-              Premium Acrylic & Metal Wall Art crafted with precision, elegance, and modern Islamic aesthetics.
+              Premium Acrylic & Metal Wall Art crafted with precision, elegance,
+              and modern Islamic aesthetics.
             </p>
 
             {/* Social */}
             <div className="flex gap-2.5 mt-6">
-              {[
-                { icon: Instagram, color: "#E1306C" },
-                { icon: Facebook,  color: "#1877F2" },
-                { icon: Twitter,   color: "#1DA1F2" },
-              ].map(({ icon: Icon, color }, i) => (
+              {SOCIAL.map(({ icon: Icon, color }, i) => (
                 <button
                   key={i}
                   className="w-9 h-9 rounded-xl bg-white flex items-center justify-center cursor-pointer transition-transform duration-200 hover:scale-110"
@@ -51,7 +109,9 @@ export default function Footer() {
 
             {/* Newsletter */}
             <div className="mt-7">
-              <p className="text-[11px] font-bold text-white/30 uppercase tracking-[1.2px] mb-2.5">Stay Updated</p>
+              <p className="text-[11px] font-bold text-white/30 uppercase tracking-[1.2px] mb-2.5">
+                Stay Updated
+              </p>
               <div className="flex gap-2">
                 <input
                   placeholder="Your email..."
@@ -60,7 +120,10 @@ export default function Footer() {
                 />
                 <button
                   className="px-4 py-2.5 rounded-xl text-[12px] font-bold cursor-pointer transition-transform duration-200 hover:-translate-y-0.5"
-                  style={{ background: "var(--color-gold)", color: "var(--color-blue-dark)" }}
+                  style={{
+                    background: "var(--color-gold)",
+                    color: "var(--color-blue-dark)",
+                  }}
                 >
                   Subscribe
                 </button>
@@ -73,34 +136,30 @@ export default function Footer() {
             <div className="w-px h-full bg-white/10" />
           </div>
 
-          {/* Links */}
-          <div className="col-span-7 grid grid-cols-3 gap-8">
-            <DesktopCol title="Explore" links={[
-              { label: "All Products",    href: "#" },
-              { label: "Best Sellers",    href: "#" },
-              { label: "New Arrivals",    href: "#" },
-              { label: "Custom Projects", href: "#" },
-              { label: "Get a Quote",     href: "#" },
-            ]} />
+          {/* Link cols */}
+          <div className="col-span-7 grid grid-cols-3 gap-0">
+            {/* ── Explore — dynamic from CATEGORIES ── */}
+            <DesktopCol title="Explore" links={EXPLORE_LINKS} />
 
-            <DesktopCol title="Services" links={[
-              { label: "Islamic Wall Art", href: "#" },
-              { label: "LED Signage",      href: "#" },
-              { label: "Name Plates",      href: "#" },
-              { label: "Wall Clocks",      href: "#" },
-              { label: "Bulk Orders",      href: "#" },
-            ]} />
+            {/* ── Services ── */}
+            <DesktopCol title="Services" links={SERVICE_LINKS} />
 
+            {/* ── Contact ── */}
             <div>
-              <p className="text-[15px] font-bold text-[var(--color-gold)] uppercase tracking-[1.5px] mb-5">Contact</p>
+              <p className="text-[15px] font-bold text-[var(--color-gold)] uppercase tracking-[1.5px] mb-5">
+                Contact
+              </p>
               <div className="space-y-3.5">
-                {[
-                  { icon: Phone,  text: "+91 99787 50622",       color: "#16a34a" },
-                  { icon: Mail,   text: "hello@glowison.com",    color: "var(--color-blue)" },
-                  { icon: MapPin, text: "Surat, Gujarat, India", color: "#dc2626" },
-                ].map(({ icon: Icon, text, color }) => (
-                  <div key={text} className="flex items-center gap-2.5 group cursor-pointer">
-                    <div className="w-7 h-7 rounded-lg bg-white flex items-center justify-center shrink-0"
+                {CONTACT_ITEMS.map(({ icon: Icon, text, href, color }) => (
+                  <a
+                    key={text}
+                    href={href}
+                    target={href.startsWith("http") ? "_blank" : "_self"}
+                    rel="noreferrer"
+                    className="flex place-items-start gap-2.5 group cursor-pointer no-underline"
+                  >
+                    <div
+                      className="w-7 h-7 rounded-lg bg-white flex items-center justify-center shrink-0"
                       style={{ border: "1px solid rgba(255,255,255,0.1)" }}
                     >
                       <Icon size={13} style={{ color }} />
@@ -108,7 +167,7 @@ export default function Footer() {
                     <span className="text-[14px] text-white/60 group-hover:text-white/90 transition-colors duration-150 font-medium">
                       {text}
                     </span>
-                  </div>
+                  </a>
                 ))}
               </div>
             </div>
@@ -116,9 +175,8 @@ export default function Footer() {
         </div>
       </div>
 
-      {/* ===== MOBILE ===== */}
+      {/* ══════════════ MOBILE ══════════════ */}
       <div className="md:hidden">
-
         {/* Brand header */}
         <div className="px-5 pt-8 pb-6 border-b border-white/10">
           <img
@@ -127,14 +185,11 @@ export default function Footer() {
             className="h-10 w-auto object-contain mb-3"
           />
           <p className="text-[13px] text-white/50 leading-relaxed max-w-[280px] mt-5">
-            Premium Islamic Wall Art crafted with precision and modern aesthetics.
+            Premium Islamic Wall Art crafted with precision and modern
+            aesthetics.
           </p>
           <div className="flex gap-2.5 mt-4">
-            {[
-              { icon: Instagram, color: "#E1306C" },
-              { icon: Facebook,  color: "#1877F2" },
-              { icon: Twitter,   color: "#1DA1F2" },
-            ].map(({ icon: Icon, color }, i) => (
+            {SOCIAL.map(({ icon: Icon, color }, i) => (
               <button
                 key={i}
                 className="w-9 h-9 rounded-xl bg-white flex items-center justify-center cursor-pointer"
@@ -150,69 +205,90 @@ export default function Footer() {
         <div className="px-4 py-3">
           {[
             {
-              key: "explore", title: "Explore",
-              links: ["All Products","Best Sellers","New Arrivals","Custom Projects","Get a Quote"],
+              key: "explore",
+              title: "Explore",
+              // ── Dynamic from CATEGORIES ──
+              links: EXPLORE_LINKS,
             },
             {
-              key: "services", title: "Services",
-              links: ["Islamic Wall Art","LED Signage","Name Plates","Wall Clocks","Bulk Orders"],
+              key: "services",
+              title: "Services",
+              links: SERVICE_LINKS,
             },
             {
-              key: "contact", title: "Contact",
+              key: "contact",
+              title: "Contact",
               custom: (
                 <div className="space-y-2.5 pb-1">
-                  {[
-                    { icon: Phone,  text: "+91 99787 50622",       color: "#16a34a" },
-                    { icon: Mail,   text: "hello@glowison.com",    color: "var(--color-blue)" },
-                    { icon: MapPin, text: "Surat, Gujarat, India", color: "#dc2626" },
-                  ].map(({ icon: Icon, text, color }) => (
-                    <div key={text} className="flex items-center gap-3">
+                  {CONTACT_ITEMS.map(({ icon: Icon, text, href, color }) => (
+                    <a
+                      key={text}
+                      href={href}
+                      target={href.startsWith("http") ? "_blank" : "_self"}
+                      rel="noreferrer"
+                      className="flex items-center gap-3 no-underline"
+                    >
                       <div
                         className="w-8 h-8 rounded-lg flex items-center justify-center shrink-0"
-                        style={{ background: "rgba(255,255,255,0.07)", border: "1px solid rgba(255,255,255,0.1)" }}
+                        style={{
+                          background: "rgba(255,255,255,0.07)",
+                          border: "1px solid rgba(255,255,255,0.1)",
+                        }}
                       >
                         <Icon size={13} style={{ color }} />
                       </div>
-                      <span className="text-[13px] text-white/60 font-medium">{text}</span>
-                    </div>
+                      <span className="text-[13px] text-white/60 font-medium">
+                        {text}
+                      </span>
+                    </a>
                   ))}
                 </div>
               ),
             },
           ].map(({ key, title, links, custom }) => (
             <div key={key} className="border-b border-white/10 last:border-b-0">
-
               <button
                 onClick={() => toggle(key)}
                 className="w-full flex items-center justify-between py-4 cursor-pointer"
               >
-                <span className="text-[17px] font-bold text-white/90 tracking-wide">{title}</span>
+                <span className="text-[17px] font-bold text-white/90 tracking-wide">
+                  {title}
+                </span>
                 <div
                   className="w-7 h-7 rounded-lg flex items-center justify-center transition-colors duration-200"
-                  style={{ background: open === key ? "var(--color-gold)" : "rgba(255,255,255,0.08)" }}
+                  style={{
+                    background:
+                      open === key
+                        ? "var(--color-gold)"
+                        : "rgba(255,255,255,0.08)",
+                  }}
                 >
                   <ChevronDown
                     size={14}
                     color={open === key ? "var(--color-blue-dark)" : "white"}
                     style={{
-                      transform: open === key ? "rotate(180deg)" : "rotate(0deg)",
+                      transform:
+                        open === key ? "rotate(180deg)" : "rotate(0deg)",
                       transition: "transform 0.2s ease",
                     }}
                   />
                 </div>
               </button>
 
-              {/* ✅ grid-rows trick — no layout thrash, GPU accelerated */}
               <div
                 className="grid transition-[grid-template-rows] duration-200 ease-out"
                 style={{ gridTemplateRows: open === key ? "1fr" : "0fr" }}
               >
                 <div className="overflow-hidden">
                   <div className="pb-4">
-                    {custom ? custom : (
+                    {custom ? (
+                      custom
+                    ) : (
                       <div className="space-y-1">
-                        {links.map((label) => (
-                          <a key={label} href="#"
+                        {links.map(({ label, href }) => (
+                          <Link
+                            key={label}
+                            href={href}
                             className="flex items-center gap-2.5 px-3 pl-5 py-2.5 rounded-xl hover:bg-white/5 transition-colors duration-150 group"
                           >
                             <ArrowRight
@@ -222,14 +298,13 @@ export default function Footer() {
                             <span className="text-[15px] text-white/60 font-medium group-hover:text-white/90 transition-colors duration-150">
                               {label}
                             </span>
-                          </a>
+                          </Link>
                         ))}
                       </div>
                     )}
                   </div>
                 </div>
               </div>
-
             </div>
           ))}
         </div>
@@ -237,7 +312,10 @@ export default function Footer() {
         {/* Mobile newsletter */}
         <div
           className="mx-4 mb-6 mt-2 p-4 rounded-2xl"
-          style={{ background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.1)" }}
+          style={{
+            background: "rgba(255,255,255,0.05)",
+            border: "1px solid rgba(255,255,255,0.1)",
+          }}
         >
           <p className="text-[11px] font-bold text-[var(--color-gold)] uppercase tracking-[1.2px] mb-2.5">
             Stay Updated
@@ -251,7 +329,10 @@ export default function Footer() {
             />
             <button
               className="px-4 py-2.5 rounded-xl text-[12px] font-bold cursor-pointer transition-transform duration-200 hover:opacity-90"
-              style={{ background: "var(--color-gold)", color: "var(--color-blue-dark)" }}
+              style={{
+                background: "var(--color-gold)",
+                color: "var(--color-blue-dark)",
+              }}
             >
               Go
             </button>
@@ -261,18 +342,25 @@ export default function Footer() {
 
       {/* Bottom bar */}
       <div className="border-t border-white/10 px-5 py-4 flex flex-col md:flex-row items-center justify-between gap-2">
-        <p className="text-[13px] text-white/40 font-medium">© 2026 Glowison. All rights reserved.</p>
+        <p className="text-[13px] text-white/40 font-medium">
+          © 2026 Glowison. All rights reserved.
+        </p>
         <div className="flex items-center gap-4">
-          {["Privacy Policy", "Terms of Use", "Shipping Policy"].map((t) => (
-            <a key={t} href="#"
+          {[
+            { label: "Privacy Policy",  href: "/privacy-policy"  },
+            { label: "Terms of Use",    href: "/terms-of-use"    },
+            { label: "Shipping Policy", href: "/shipping-policy" },
+          ].map(({ label, href }) => (
+            <Link
+              key={label}
+              href={href}
               className="text-[13px] text-white/40 hover:text-white/70 transition-colors duration-150 font-medium"
             >
-              {t}
-            </a>
+              {label}
+            </Link>
           ))}
         </div>
       </div>
-
     </footer>
   );
 }
@@ -280,17 +368,21 @@ export default function Footer() {
 function DesktopCol({ title, links }) {
   return (
     <div>
-      <p className="text-[15px] font-bold text-[var(--color-gold)] uppercase tracking-[1.5px] mb-5">{title}</p>
+      <p className="text-[15px] font-bold text-[var(--color-gold)] uppercase tracking-[1.5px] mb-5">
+        {title}
+      </p>
       <div className="space-y-3">
         {links.map(({ label, href }) => (
-          <a key={label} href={href}
+          <Link
+            key={label}
+            href={href}
             className="flex items-center gap-2 text-[14px] text-white/55 hover:text-white/90 transition-colors duration-150 font-medium group w-fit"
           >
             <span className="w-0 overflow-hidden group-hover:w-3 transition-all duration-150 opacity-0 group-hover:opacity-100">
               <ArrowRight size={13} className="text-[var(--color-gold)]" />
             </span>
             {label}
-          </a>
+          </Link>
         ))}
       </div>
     </div>
