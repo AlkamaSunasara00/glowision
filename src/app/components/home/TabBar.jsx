@@ -206,7 +206,7 @@ function FullScreenSearch({ open, onClose }) {
     <div
       className="md:hidden "
       style={{
-        position: "fixed", inset: 0, zIndex: 979,
+        position: "fixed", inset: 0,
         background: "#f8f9fc",
         transform: open ? "translateY(0)" : "translateY(100%)",
         opacity:   open ? 1 : 0,
@@ -530,7 +530,7 @@ export default function BottomTabBar() {
       <FullScreenSearch open={searchOpen} onClose={() => setSearchOpen(false)} />
 
       {/* Tab bar */}
-      <div className="fixed bottom-0 left-0 right-0 z-50 flex justify-center pb-5 px-4 md:hidden">
+      <div className="fixed bottom-0 left-0 right-0 z-[9990] flex justify-center pb-5 px-4 md:hidden">
         <div style={{
           background: "var(--color-blue-dark, #0f172a)",
           borderRadius: 999,
