@@ -1,4 +1,4 @@
-// FILE LOCATION: src/app/(routes)/[categorySlug]/[productSlug]/page.js
+// FILE LOCATION: src/app/(main)/[categorySlug]/[productSlug]/page.js
 //
 // URLs handled:
 //   /islamic-wall-art/ayatul-kursi-premium-frame

@@ -9,9 +9,11 @@
     "lint": "eslint"
   },
   "dependencies": {
+    "@lottiefiles/dotlottie-react": "^0.18.3",
     "clsx": "^2.1.1",
     "cross-env": "^10.1.0",
     "framer-motion": "^12.34.3",
+    "lottie-react": "^2.4.1",
     "lucide-react": "^0.575.0",
     "next": "16.1.6",
     "react": "19.2.3",

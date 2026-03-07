@@ -19,8 +19,7 @@ export default function HeroPage() {
     <>
       <HeroSlider />
       <CategoryShowcase />
-      
-      <StatsBar />
+      {/* <StatsBar /> */}
       <ProductsSection />
       <TagProductsSection
         tag="eid"

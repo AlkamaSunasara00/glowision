@@ -3,7 +3,7 @@ import Navbar from "./Navbar";
 import Footer from "./Footer";
 import { Poppins, Inter } from "next/font/google";
 import BottomTabBar from "./components/home/TabBar";
-import { Suspense } from "react"; // 1. Import Suspense
+import { Suspense } from "react";
 
 const poppins = Poppins({
   subsets: ["latin"],
